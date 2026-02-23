@@ -25,7 +25,7 @@ Follow the prompts and install using the default settings.
 #### On Windows
 As of Python 3.14, the Python install manager is the default way to install Python on Windows.
 
-There are many options to go through. See [this page](docs/WININSTALL.md) for more help.
+There are many options to go through. See [this page](https://github.com/ariannedee/python-ide/blob/main/docs/WININSTALL.md) for more help.
 Once you get to "Install CPython now?", 
 enter "Y" to install the latest version of Python.
 
