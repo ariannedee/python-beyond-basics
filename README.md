@@ -60,7 +60,7 @@ Run the file `python-beyond-basics/examples/example_1_review.py` and make sure i
 If you get an error running that file, follow the instructions here to **configure your Python version**:
 
 - [_PyCharm_](https://github.com/ariannedee/python-ide/blob/main/docs/PYTHON-IDE.md/#pycharm)
-- [_VS Code_ and _Cursor_](https://github.com/ariannedee/python-ide/blob/main/docs/PYTHON-IDE.md/#visual-studio-code)
+- [_VS Code_ and _Cursor_](https://github.com/ariannedee/python-ide/blob/main/docs/PYTHON-IDE.md/#visual-studio-code-and-cursor)
 
 ### 5. At the start of class
 Download the PDF of the slides from the **Resources** widget.
