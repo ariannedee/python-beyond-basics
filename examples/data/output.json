@@ -1,18 +1,1 @@
-[
-  {
-    "Country": "Afghanistan",
-    "Capital": "Kabul"
-  },
-  {
-    "Country": "Albania",
-    "Capital": "Tirana"
-  },
-  {
-    "Country": "Algeria",
-    "Capital": "Algiers"
-  },
-  {
-    "Country": "Andorra",
-    "Capital": "Andorra la Vella"
-  }
-]
+[{"Country": "Afghanistan", "Capital": "Kabul"}, {"Country": "Albania", "Capital": "Tirana"}, {"Country": "Algeria", "Capital": "Algiers"}, {"Country": "Andorra", "Capital": "Andorra la Vella"}]
