@@ -1,0 +1,1308 @@
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><link href="style.css" rel="stylesheet" type="text/css" /><title>Chapter 13 - Web Scraping, Automate the Boring Stuff with Python, 3rd Ed</title></head><body><div type="frontmatter" class="calibre" id="calibre_link-0">
+
+
+<div style="border: 1px solid black; padding: 5px;" id="closeable_ad_bar">
+  <button onclick="document.getElementById('closeable_ad_bar').outerHTML='';" style="vertical-align: top;">(close)</button><br>
+
+  Check out other books by Al Sweigart, <a href="https://inventwithpython.com">free online</a> or available for purchase:<br>
+
+<a target="_blank" href="https://nostarch.com/automate-boring-stuff-python-3rd-edition"><img src="/images/cover-automate3-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/big-book-small-python-projects"><img src="/images/cover-bigbookpython-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/inventwithpython"><img src="/images/cover-invent4th-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/crackingcodes"><img src="/images/cover-crackingcodes-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <br>
+  <a href="https://inventwithpython.com/">...and other books as well!</a> Or register for the <a href="https://inventwithpython.com/automateudemy">online video course.</a> You can also <a href="https://inventwithpython.com/#donate">donate to support the author directly.</a>
+</div>
+
+
+<div type="bodymatter" class="calibre" id="calibre_link-314">
+<section type="chapter" role="doc-chapter" aria-labelledby="ch13">
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1188" aria-label="289"></span>
+<hgroup>
+<h2 class="title" id="calibre_link-1765">
+<span class="tpt"><span class="sans_dogma_ot_bold_b_">13</span></span>
+<span class="ct"><span class="sans_dogma_ot_bold_b_">WEB SCRAPING</span></span>
+</h2>
+</hgroup>
+<figure class="opener"><img class="opener1" src="images/000112.jpg" role="presentation" alt="" />
+</figure>
+<p class="introtni">In those rare, terrifying moments when I’m without Wi-Fi, I realize just how much of what I do on the computer is really what I do on the internet. Out of sheer habit, I’ll find myself trying to check email, read social media, or answer the question, “Did Kurtwood Smith have any major roles before he was in the original 1987 <i class="calibre18">RoboCop</i>?”<sup class="calibre21"><a role="doc-noteref" id="calibre_link-755" href="#calibre_link-742" class="calibre1">1</a></sup></p>
+<p class="tx">Because so much work on a computer involves going on the internet, it’d be great if your programs could get online. <i class="calibre5">Web scraping</i> is a term for using a program to download and process content from the web. For example, Google runs many web scraping programs to index web pages for <span role="doc-pagebreak" type="pagebreak" id="calibre_link-984" aria-label="290"></span>its search engine. In this chapter, you’ll learn about the following modules, which make it easy to scrape web pages in Python:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">webbrowser </span>Comes with Python and opens a browser to a specific page</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">requests </span>Downloads files and web pages from the internet</p>
+<p class="listplain"><b class="calibre10">Beautiful Soup (<span class="sans_thesansmonocd_w7bold_b_">bs4</span>)</b> Parses HTML, the format that web pages are written in, to extract the information you want</p>
+<p class="listplain"><b class="calibre10">Selenium</b> Launches and controls a web browser, such as by filling in forms and simulating mouse clicks</p>
+<p class="listplain"><b class="calibre10">Playwright</b> Launches and controls a web browser; newer than Selenium and has some additional features</p>
+<section type="division" aria-labelledby="sec1">
+<h3 class="h" id="calibre_link-1766"><span id="calibre_link-315"></span><span class="sans_futura_std_bold_b_">HTTP and HTTPS</span></h3>
+<p class="tni">When you visit a website, its web address, such as <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i>, is known as a <i class="calibre5">uniform resource locator (URL)</i>. The <i class="calibre5">HTTPS</i> in the URL stands for <i class="calibre5">HyperText Transfer Protocol Secure</i>, the protocol that your web browser uses to access websites. The packages in this chapter allow your scripts to access web servers through this protocol.</p>
+<p class="tx">More precisely, HTTPS is an encrypted version of HTTP, so it protects your privacy while you use the internet. If you were using HTTP, identity thieves, national intelligence agencies, and your internet service provider could view the content of the web pages you visited, including any passwords and credit card information you submit. Using a virtual private network (VPN) could keep your internet service provider from viewing your internet traffic; however, now the VPN provider would be able to view your traffic. An unscrupulous VPN provider could then sell information about what websites you visit to data brokers. (Tom Scott discusses what a VPN does and does not provide in his video “This Video Is Sponsored by VPN.”)</p>
+<p class="tx">By contrast, any web page content you view with HTTPS will be encrypted and hidden. Websites used to use HTTPS only for pages that sent passwords and credit card numbers, but nowadays, most websites encrypt all traffic. Keep in mind, though, that the identity of the website you visit can still be known; no one will be able to see exactly what you download from CatPhotos.com, but they will see that you were connecting to the CatPhotos.com website and can figure out that you were probably looking at photos of cats. The Tor Browser, which uses the Tor anonymization network, can provide true anonymous browsing, and you can download it from <i class="calibre5"><a href="https://www.torproject.org/download/" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.torproject<wbr></wbr>.org<wbr></wbr>/download<wbr></wbr>/</a></i>.</p>
+<p class="ph"><span id="calibre_link-316"></span><span role="doc-pagebreak" type="pagebreak" id="calibre_link-983" aria-label="291"></span><span class="sans_futura_std_heavy_b_">Project 6: Run a Program with the webbrowser Module</span></p>
+<p class="tni">Let’s learn about Python’s <span class="thesansmonocd_w5regular_">webbrowser</span> module by using it in a programming project. The <span class="thesansmonocd_w5regular_">webbrowser</span> module’s <span class="thesansmonocd_w5regular_">open()</span> function can launch a new browser to a specified URL. Enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import webbrowser</b>
+&gt;&gt;&gt; <b class="calibre10">webbrowser.open('https://inventwithpython.com/')</b>
+</code></pre>
+<p class="tx">A web browser tab will open to the URL <i class="calibre5"><a href="https://inventwithpython.com" class="calibre1">https://<wbr></wbr>inventwithpython<wbr></wbr>.com</a></i>. This is about the only thing the <span class="thesansmonocd_w5regular_">webbrowser</span> module can do. Even so, the <span class="thesansmonocd_w5regular_">open()</span> function does make some interesting things possible.</p>
+<p class="tx">For example, it’s tedious to copy a street address to the clipboard every time you’d like to bring up a map of it on OpenStreetMap. You could eliminate a few steps from this task by writing a simple script to automatically launch the map in your browser using the contents of your clipboard. This way, you’d only have to copy the address to a clipboard and run the script for the map to load for you. We can put the address directly into the OpenStreetMap URL, so all we need is the <span class="thesansmonocd_w5regular_">webbrowser.open()</span> function.</p>
+<p class="tx">This is what your program does:</p>
+<ul class="ul">
+<li class="bl">Gets a street address from the command line arguments or clipboard</li>
+<li class="bl">Opens the web browser to the OpenStreetMap page for that address</li>
+</ul>
+<p class="tx">This means your code needs to do the following:</p>
+<ul class="ul">
+<li class="bl">Read the command line arguments from <span class="thesansmonocd_w5regular_">sys.argv</span>.</li>
+<li class="bl">Read the clipboard contents.</li>
+<li class="bl">Call the <span class="thesansmonocd_w5regular_">webbrowser.open()</span> function to open the web browser.</li>
+<li class="bl">Open a new file editor tab and save it as <i class="calibre5">showmap.py</i>.</li>
+</ul>
+<section type="division" aria-labelledby="sec2">
+<h4 class="h1" id="calibre_link-1767"><span id="calibre_link-317"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 1: Figure Out the URL</span></h4>
+<p class="tni">By following the instructions in <span>Chapter 12</span>, set up a <i class="calibre5">showmap.py</i> file so that when you run it from the command line, like so</p>
+<pre class="pre"><code class="calibre9">C:\Users\al&gt; <b class="calibre10">showmap 777 Valencia St, San Francisco, CA 94110</b></code></pre>
+<p class="tni">the script will use the command line arguments instead of the clipboard. If there are no command line arguments, then the program will know to use the contents of the clipboard.</p>
+<p class="tx">To do so, you need to figure out what URL to use for a given street address. When you load <i class="calibre5"><a href="https://www.openstreetmap.org" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.openstreetmap<wbr></wbr>.org</a></i> in the browser and search for an address, the URL in the address bar looks something like this: <i class="calibre5"><a href="https://www.openstreetmap.org/search?query=777%20Valencia%20St%2C%20San%20Francisco%2C%20CA%2094110#map=19/37.75897/-122.42142" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.openstreetmap<wbr></wbr>.org<wbr></wbr>/search<wbr></wbr>?query<wbr></wbr>=777%20Valencia%20St%2C%20San%20Francisco%2C%20CA%2094110#map<wbr></wbr>=19<wbr></wbr>/37<wbr></wbr>.75897<wbr></wbr>/<wbr></wbr>-122<wbr></wbr>.42142</a></i>.</p>
+<p class="tx">We can test that the URL doesn’t need the <i class="calibre5">#map</i> part by taking it out of the address bar and visiting that site to confirm it still loads properly. So, your program can be set to open a web browser to <i class="calibre5"><a href="https://www.openstreetmap.org/search%3Fquery=%3Cyour_address_string%3E" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.openstreetmap<wbr></wbr>.org<wbr></wbr>/search<wbr></wbr>?query<wbr></wbr>=&lt;your<wbr></wbr>_address<wbr></wbr>_string&gt;</a></i> (where <i class="calibre5">&lt;your_address_string&gt;</i> is the address <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1216" aria-label="292"></span>you want to map). Note that your browser automatically handles any necessary URL encoding, such as converting space characters in the URL to <i class="calibre5">%20</i>.</p>
+</section>
+<section type="division" aria-labelledby="sec3">
+<h4 class="h1" id="calibre_link-1768"><span id="calibre_link-318"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 2: Handle the Command Line Arguments</span></h4>
+<p class="tni">Make your code look like this:</p>
+<pre class="pre"><code class="calibre9"># showmap.py - Launches a map in the browser using an address from the
+# command line or clipboard
+
+import webbrowser, sys
+if len(sys.argv) &gt; 1:
+    # Get address from command line.
+    address = ' '.join(sys.argv[1:])
+
+# TODO: Get address from clipboard.
+
+# TODO: Open the web browser.
+</code></pre>
+<p class="tx">First, you need to import the <span class="thesansmonocd_w5regular_">webbrowser</span> module for launching the browser and the <span class="thesansmonocd_w5regular_">sys</span> module for reading the potential command line arguments. The <span class="thesansmonocd_w5regular_">sys.argv</span> variable stores the program’s filename and command line arguments as a list. If this list has more than just the filename in it, then <span class="thesansmonocd_w5regular_">len(sys.argv)</span> evaluates to an integer greater than <span class="thesansmonocd_w5regular_">1</span>, meaning that command line arguments have indeed been provided.</p>
+<p class="tx">Command line arguments are usually separated by spaces, but in this case, you’ll want to interpret all of the arguments as a single string. Because <span class="thesansmonocd_w5regular_">sys.argv</span> is a list of strings, you can pass it to the <span class="thesansmonocd_w5regular_">join()</span> method, which returns a single string value. You don’t want the program name in this string, so you should pass <span class="thesansmonocd_w5regular_">sys.argv[1:]</span> instead of <span class="thesansmonocd_w5regular_">sys.argv</span> to chop off the first element of the array. The final string that this expression evaluates to is stored in the <span class="thesansmonocd_w5regular_">address</span> variable.</p>
+<p class="tx">If you run the program by entering this into the command line</p>
+<pre class="pre"><code class="calibre9">showmap 777 Valencia St, San Francisco, CA 94110</code></pre>
+<p class="tni">the <span class="thesansmonocd_w5regular_">sys.argv</span> variable will contain this list value:</p>
+<pre class="pre"><code class="calibre9">['showmap.py', '777', 'Valencia', 'St, ', 'San', 'Francisco, ', 'CA', '94110']</code></pre>
+<p class="tx">After you’ve joined <span class="thesansmonocd_w5regular_">sys.argv[1:]</span> with a space character, the <span class="thesansmonocd_w5regular_">address</span> variable will contain the string <span class="thesansmonocd_w5regular_">'777 Valencia St, San Francisco, CA 94110'</span>.</p>
+</section>
+<section type="division" aria-labelledby="sec4">
+<h4 class="h1" id="calibre_link-1769"><span id="calibre_link-319"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 3: Retrieve the Clipboard Content</span></h4>
+<p class="tni">To fetch the URL from the clipboard, make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># showmap.py - Launches a map in the browser using an address from the
+# command line or clipboard
+
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1255" aria-label="293"></span>import webbrowser, sys<b class="calibre10">, pyperclip</b>
+if len(sys.argv) &gt; 1:
+    # Get address from command line.
+    address = ' '.join(sys.argv[1:])
+<b class="calibre10">else:</b>
+    # Get address from clipboard.
+<b class="calibre10">    address = pyperclip.paste()</b>
+
+# Open the web browser.
+<b class="calibre10">webbrowser.open('https://www.openstreetmap.org/search?query=' + address)</b>
+</code></pre>
+<p class="tx">If there are no command line arguments, the program will assume the address is stored on the clipboard. You can get the clipboard content with <span class="thesansmonocd_w5regular_">pyperclip.paste()</span> and store it in a variable named <span class="thesansmonocd_w5regular_">address</span>. Finally, to launch a web browser with the OpenStreetMap URL, call <span class="thesansmonocd_w5regular_">webbrowser.open()</span>.</p>
+<p class="tx">While some of the programs you write will perform huge tasks that save you hours, it can be just as satisfying to use a program that conveniently saves you a few seconds each time you perform a common task, such as getting a map of an address. Table 13-1 compares the steps needed to display a map with and without <i class="calibre5">showmap.py</i>.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-743"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-1:</span></span> <span class="sans_futura_std_book_">Getting a Map with and Without</span> <span class="sans_futura_std_book_oblique_i_">showmap.py</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Manually getting a map</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Using</span> <span class="sans_futura_std_heavy_oblique_bi_">showmap.py</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">1. Highlight the address.</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">1. Highlight the address.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">2. Copy the address.</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">2. Copy the address.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">3. Open the web browser.</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">3. Run</span> <span class="sans_futura_std_book_oblique_i_">showmap.py</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">4. Go to</span> <span class="sans_futura_std_book_oblique_i_"><a href="https://www.openstreetmap.org" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.openstreetmap<wbr></wbr>.org</a></span></p></td>
+<td class="tb"></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">5. Click the address text field.</span></p></td>
+<td class="tb"></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">6. Paste the address.</span></p></td>
+<td class="tb"></td>
+</tr>
+<tr class="calibre16">
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">7. Press</span> <span class="sans_futura_std_book_sc_">ENTER</span><span class="sans_futura_std_book_">.</span></p></td>
+<td class="tbl"></td>
+</tr>
+</tbody>
+</table>
+<p class="tx">We’re fortunate that the OpenStreetMap website doesn’t require any interaction to get a map; we can just put the address information directly into the URL. The <i class="calibre5">showmap.py</i> script makes this task less tedious, especially if you do it frequently.</p>
+</section>
+<section type="division" aria-labelledby="sec5">
+<h4 class="h1" id="calibre_link-1770"><span id="calibre_link-320"></span><span class="sans_futura_std_heavy_oblique_bi_">Ideas for Similar Programs</span></h4>
+<p class="tni">As long as you have a URL, the <span class="thesansmonocd_w5regular_">webbrowser</span> module lets users cut out the step of opening the browser and directing themselves to a website. Other programs could use this functionality to do the following:</p>
+<ul class="ul">
+<li class="bl">Open all links on a page in separate browser tabs.</li>
+<li class="bl">Open the browser to the URL for your local weather site.</li>
+<li class="bl">Open several social networking sites or bookmarked sites that you regularly check.</li>
+<li class="bl">Open a local <i class="calibre5">.html</i> file on your hard drive.</li>
+</ul>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1122" aria-label="294"></span>The last suggestion is useful for displaying help files. While your program could use <span class="thesansmonocd_w5regular_">print()</span> to display a help page to the user, calling <span class="thesansmonocd_w5regular_">webbrowser.open()</span> to open a <i class="calibre5">.html</i> file with help information allows the page to have different fonts, color, tables, and images. Instead of the <i class="calibre5">https://</i> prefix, use the <i class="calibre5">file://</i> prefix. For example, your <i class="calibre5">Desktop</i> folder should have a local <i class="calibre5">help.html</i> file at <i class="calibre5">file:///C:/Users/al/Desktop/help.html</i> on Windows or <i class="calibre5">file:///Users/al/Desktop/ help.html</i> on macOS.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec6">
+<h3 class="h" id="calibre_link-1771"><span id="calibre_link-321"></span><span class="sans_futura_std_bold_b_">Downloading Files from the Web with the requests Module</span></h3>
+<p class="tni">The <span class="thesansmonocd_w5regular_">requests</span> module lets you easily download files from the web without having to worry about complicated issues such as network errors, connection routing, and data compression. The module doesn’t come with Python, so you’ll have to install it before you can use it by following the instructions in <span>Appendix A</span>.</p>
+<section type="division" aria-labelledby="sec7">
+<h4 class="h1" id="calibre_link-1772"><span id="calibre_link-322"></span><span class="sans_futura_std_heavy_oblique_bi_">Downloading Web Pages</span></h4>
+<p class="tni">The <span class="thesansmonocd_w5regular_">requests.get()</span> function takes a string representing a URL to download. By calling <span class="thesansmonocd_w5regular_">type()</span> on the function’s return value, you can see that it returns a <span class="thesansmonocd_w5regular_">Response</span> object, which contains the response that the web server gave for your request. I’ll explain the <span class="thesansmonocd_w5regular_">Response</span> object in more detail later, but for now, enter the following into the interactive shell while your computer is connected to the internet:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import requests</b>
+<span class="codeannotated_codeannotation" aria-label="annotation1">❶</span> &gt;&gt;&gt; <b class="calibre10">response = requests.get('https://automatetheboringstuff.com/files/rj.txt')</b>
+&gt;&gt;&gt; <b class="calibre10">type(response)</b>
+&lt;class 'requests.models.Response'&gt;
+<span class="codeannotated_codeannotation" aria-label="annotation2">❷</span> &gt;&gt;&gt; <b class="calibre10">response.status_code == requests.codes.ok</b>
+True
+&gt;&gt;&gt; <b class="calibre10">len(response.text)</b>
+178978
+&gt;&gt;&gt; <b class="calibre10">print(response.text[:210])</b>
+The Project Gutenberg EBook of Romeo and Juliet, by William Shakespeare
+
+This eBook is for the use of anyone anywhere at no cost and with
+almost no restrictions whatsoever.  You may copy it, give it away or
+</code></pre>
+<p class="tx">The URL takes you to a web page containing the entire text of <i class="calibre5">Romeo and Juliet</i> <span class="codeannotation" aria-label="annotation1">❶</span>. You can tell that the request for the web page succeeded by checking the <span class="thesansmonocd_w5regular_">Response</span> object’s <span class="thesansmonocd_w5regular_">status_code</span> attribute. If it’s equal to the value of <span class="thesansmonocd_w5regular_">requests.codes.ok</span>, everything went fine <span class="codeannotation" aria-label="annotation2">❷</span>. (Incidentally, the status code for “OK” in HTTP is 200. You may already be familiar with the 404 status code for “Not Found.”)</p>
+<p class="tx">If the request succeeded, the downloaded web page is stored as a string in the <span class="thesansmonocd_w5regular_">Response</span> object’s <span class="thesansmonocd_w5regular_">text</span> variable. This large string consists of the entire play; the call to <span class="thesansmonocd_w5regular_">len(response.text)</span> shows you that it’s more than 178,000 characters long. Finally, calling <span class="thesansmonocd_w5regular_">print(response.text[:210])</span> displays only the first 210 characters.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1278" aria-label="295"></span>If the request failed and displayed an error message, like “Failed to establish a new connection” or “Max retries exceeded,” check your internet connection. Connecting to servers can be quite complicated, and I can’t give a full list of possible problems here. You can find common causes of your error by doing a web search of the error message in quotes. Also keep in mind that if you download a web page with <span class="thesansmonocd_w5regular_">requests</span>, you’ll get only the HTML content of the web page. You must download images and other media separately.</p>
+</section>
+<section type="division" aria-labelledby="sec8">
+<h4 class="h1" id="calibre_link-1773"><span id="calibre_link-323"></span><span class="sans_futura_std_heavy_oblique_bi_">Checking for Errors</span></h4>
+<p class="tni">As you’ve seen, the <span class="thesansmonocd_w5regular_">Response</span> object has a <span class="thesansmonocd_w5regular_">status_code</span> attribute that you can check against <span class="thesansmonocd_w5regular_">requests.codes.ok</span> to see whether the download succeeded. A simpler way to check for success is to call the <span class="thesansmonocd_w5regular_">raise_for_status()</span> method on the <span class="thesansmonocd_w5regular_">Response</span> object. This method will raise an exception if an error occurred while downloading the file and will do nothing if the download succeeded. Enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">response = requests.get('https://inventwithpython.com/page_that_does_not_exist')</b>
+&gt;&gt;&gt; <b class="calibre10">response.raise_for_status()</b>
+Traceback (most recent call last):
+  File "&lt;python-input-0&gt;", line 1, in &lt;module&gt;
+
+  File "C:\Users\Al\AppData\Local\Programs\Python\Python<var class="calibre20">XX</var>\lib\site-packages\
+requests\models.py", line 940, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url:
+https://inventwithpython.com/page_that_does_not_exist.html
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">raise_for_status()</span> method is an easy way to ensure that a program halts if a bad download occurs. Generally, you’ll want your program to stop as soon as some unexpected error happens. If a failed download isn’t a deal breaker, you can wrap the <span class="thesansmonocd_w5regular_">raise_for_status()</span> line with <span class="thesansmonocd_w5regular_">try</span> and <span class="thesansmonocd_w5regular_">except</span> statements to handle this error case without crashing:</p>
+<pre class="pre"><code class="calibre9">import requests
+response = requests.get('https://inventwithpython.com/page_that_does_not_exist')
+try:
+    response.raise_for_status()
+except Exception as exc:
+    print(f'There was a problem: {exc}')
+</code></pre>
+<p class="tx">This <span class="thesansmonocd_w5regular_">raise_for_status()</span> method call causes the program to output the following:</p>
+<pre class="pre"><code class="calibre9">There was a problem: 404 Client Error: Not Found for url:
+https://inventwithpython.com/page_that_does_not_exist.html
+</code></pre>
+<p class="tx">Always call <span class="thesansmonocd_w5regular_">raise_for_status()</span> after calling <span class="thesansmonocd_w5regular_">requests.get()</span>. You should be sure that the download has actually worked before your program continues.</p>
+</section>
+<section type="division" aria-labelledby="sec9">
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-990" aria-label="296"></span>
+<h4 class="h1" id="calibre_link-1774"><span id="calibre_link-324"></span><span class="sans_futura_std_heavy_oblique_bi_">Saving Downloaded Files to the Hard Drive</span></h4>
+<p class="tni">From here, you can save the web page to a file on your hard drive with the standard <span class="thesansmonocd_w5regular_">open()</span> function and <span class="thesansmonocd_w5regular_">write()</span> method. However, you must open the file in <i class="calibre5">write binary</i> mode by passing the string <span class="thesansmonocd_w5regular_">'wb'</span> as the second argument to <span class="thesansmonocd_w5regular_">open()</span>. Even if the page is in plaintext (such as the <i class="calibre5">Romeo and Juliet</i> text you downloaded earlier), you need to write binary data instead of text data in order to maintain the Unicode encoding of the text.</p>
+<p class="tx">To write the web page to a file, you can use a <span class="thesansmonocd_w5regular_">for</span> loop with the <span class="thesansmonocd_w5regular_">Response</span> object’s <span class="thesansmonocd_w5regular_">iter_content()</span> method:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import requests</b>
+&gt;&gt;&gt; <b class="calibre10">response = requests.get('https://automatetheboringstuff.com/files/rj.txt')</b>
+&gt;&gt;&gt; <b class="calibre10">response.raise_for_status()</b>
+&gt;&gt;&gt; <b class="calibre10">with open('RomeoAndJuliet.txt', 'wb') as play_file:</b>
+...     <b class="calibre10">for chunk in response.iter_content(100000):</b>
+...    <b class="calibre10">     play_file.write(chunk)</b>
+...
+100000
+78978
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">iter_content()</span> method returns “chunks” of the content on each iteration through the loop. Each chunk is of the <i class="calibre5">bytes</i> data type, and you get to specify how many bytes each chunk will contain. One hundred thousand bytes is generally a good size, so pass <span class="thesansmonocd_w5regular_">100000</span> as the argument to <span class="thesansmonocd_w5regular_">iter_content()</span>.</p>
+<p class="tx">The file <i class="calibre5">RomeoAndJuliet.txt</i> now exists in the current working directory. Note that while the filename on the website was <i class="calibre5">rj.txt</i>, the file on your hard drive has a different filename.</p>
+<p class="tx">The <span class="thesansmonocd_w5regular_">write()</span> method returns the number of bytes written to the file. In the previous example, there were 100,000 bytes in the first chunk, and the remaining part of the file needed only 78,978 bytes.</p>
+<aside class="box" aria-label="box-15">
+<p class="bt" id="calibre_link-1775"><span class="sans_futura_std_bold_b_">A REVIEW OF FILE DOWNLOADING AND SAVING</span></p>
+<p class="btni"><span class="sans_futura_std_book_">To review, here’s the complete process for downloading and saving a file:</span></p>
+<ul class="ul">
+<li class="boxlistbullet"><span class="sans_futura_std_book_">Call</span> <span class="thesansmonocd_w5regular_">requests.get()</span> <span class="sans_futura_std_book_">to download the file.</span></li>
+<li class="boxlistbullet"><span class="sans_futura_std_book_">Call</span> <span class="thesansmonocd_w5regular_">open()</span> <span class="sans_futura_std_book_">with</span> <span class="thesansmonocd_w5regular_">'wb'</span> <span class="sans_futura_std_book_">to create a new file in write binary mode.</span></li>
+<li class="boxlistbullet"><span class="sans_futura_std_book_">Loop over the</span> <span class="thesansmonocd_w5regular_">Response</span> <span class="sans_futura_std_book_">object’s</span> <span class="thesansmonocd_w5regular_">iter_content()</span> <span class="sans_futura_std_book_">method.</span></li>
+<li class="boxlistbullet"><span class="sans_futura_std_book_">Call</span> <span class="thesansmonocd_w5regular_">write()</span> <span class="sans_futura_std_book_">on each iteration to write the content to the file.</span></li>
+</ul>
+</aside>
+<p class="tx">That’s all there is to the <span class="thesansmonocd_w5regular_">requests</span> module! You can learn about the module’s other features at <i class="calibre5"><a href="https://requests.readthedocs.io/en/latest/" class="calibre1">https://<wbr></wbr>requests<wbr></wbr>.readthedocs<wbr></wbr>.io<wbr></wbr>/en<wbr></wbr>/latest<wbr></wbr>/</a></i>.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-911" aria-label="297"></span>If you want to download video files from websites such as YouTube, Facebook, X (formerly Twitter), or other sites, use the <span class="thesansmonocd_w5regular_">yt-dlp</span> module instead, covered in <span>Chapter 24</span>.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec10">
+<h3 class="h" id="calibre_link-1776"><span id="calibre_link-325"></span><span class="sans_futura_std_bold_b_">Accessing a Weather API</span></h3>
+<p class="tni">The apps you use are designed to interact with human users. However, you can write programs to interact with other programs through their <i class="calibre5">application programming interface (API)</i>, which is the specification that defines how one piece of software (such as your Python program) can communicate with another piece of software (such as the web server for a weather site). Online services often have APIs. For example, you could write a Python script to post to your social media accounts or download new photos. In this section, we’ll write a script that accesses weather information from the free OpenWeather website.</p>
+<p class="tx">Almost all online services require you to register an email address to use their API. Even if the API is free, they may have limits to how many API requests you can make per hour or day. If you’re worried about receiving spam email, you can use a temporary, disposable email address service such as <i class="calibre5"><a href="https://10minutemail.com" class="calibre1">https://<wbr></wbr>10minutemail<wbr></wbr>.com</a></i>. Keep in mind that you should use such services only to register for online accounts you don’t care about, as an unscrupulous email service could take control of your online account by making a password reset request in your name.</p>
+<p class="tx">To start, sign up for a free account at <i class="calibre5"><a href="https://openweathermap.org" class="calibre1">https://<wbr></wbr>openweathermap<wbr></wbr>.org</a></i>. The free account tier limits you to making 60 API requests per minute. This is more than enough for your small or medium-sized programming projects. If your program needs more than this limit (say, because it’s processing requests from hundreds of simultaneous visitors to your website), you can purchase a paid account tier. Online services will give you an <i class="calibre5">API key</i>, which is sort of a password that identifies your account in your API requests. Keep this API key a secret! Anyone with this key can make API requests credited to your account. If you write a program that uses an API key, consider having the program read a text file that contains the key instead of including the API key directly in your source code. This way, you can share your program with others (who can sign up for their own API key) without worrying about exceeding the API request limits of your account.</p>
+<p class="tx">Many HTTP APIs deliver their responses as one large string. This string is often formatted as JSON or XML. <span>Chapter 18</span> covers JSON and XML in more detail, but for now, you just need to know that <span class="thesansmonocd_w5regular_">json.loads(response.text)</span> returns a Python data structure of lists and dictionaries containing the JSON data in <span class="thesansmonocd_w5regular_">response.text</span>. The examples in this chapter store this data in a variable named <span class="thesansmonocd_w5regular_">response_data</span>, but this is an arbitrary choice, and you can use any variable name you’d like.</p>
+<p class="tx">All online services document how to use their API. OpenWeather provides its documentation at <i class="calibre5"><a href="https://openweathermap.org/api" class="calibre1">https://<wbr></wbr>openweathermap<wbr></wbr>.org<wbr></wbr>/api</a></i>. After you’ve logged in to your account and obtained your API key from the <i class="calibre5">My API keys</i> page at <i class="calibre5"><a href="https://home.openweathermap.org/api_keys" class="calibre1">https://<wbr></wbr>home<wbr></wbr>.openweathermap<wbr></wbr>.org<wbr></wbr>/api<wbr></wbr>_keys</a></i>, use it in the following interactive <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1174" aria-label="298"></span>shell code. I’ll use <span class="thesansmonocd_w5regular_">'30ee784a80d81480dab1749d33980112'</span> as a fake API key in this example. Don’t use this fake API key example in your code; it won’t work.</p>
+<p class="tx">First, you’ll use OpenWeather to find the latitude and longitude of San Francisco:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import requests</b>
+&gt;&gt;&gt; <b class="calibre10">city_name = 'San Francisco'</b>
+&gt;&gt;&gt; <b class="calibre10">state_code = 'CA'</b>
+&gt;&gt;&gt; <b class="calibre10">country_code = 'US'</b>
+&gt;&gt;&gt; <b class="calibre10">API_key = '30ee784a80d81480dab1749d33980112'  </b># Not a real API key
+&gt;&gt;&gt; <b class="calibre10">response = requests.get(f'https://api.openweathermap.org/geo/1.0/</b>
+<b class="calibre10">direct?q={city_name},{state_code},{country_code}&amp;appid={API_key}')</b>
+&gt;&gt;&gt; <b class="calibre10">response.text  </b># This is a Python string.
+'[{"name":"San Francisco","local_names":{"id":"San Francisco",
+<var class="calibre20">--snip--</var>
+,"lat":37.7790262,"lon":-122.419906,"country":"US","state":"California"}]'
+&gt;&gt;&gt; <b class="calibre10">import json</b>
+&gt;&gt;&gt; <b class="calibre10">response_data = json.loads(response.text)</b>
+&gt;&gt;&gt; <b class="calibre10">response_data</b>  # This is a Python data structure.
+[{"name":"San Francisco","local_names":{"id":"San Francisco",
+<var class="calibre20">--snip--</var>
+,"lat":37.7790262,"lon":-122.419906,"country":"US","state":"California"}]
+</code></pre>
+<p class="tx">To understand the data in the response, you should look at the online API documentation for OpenWeather or examine the dictionary in <span class="thesansmonocd_w5regular_">response_data</span> in the interactive shell. You’ll learn that the response is a list whose first item (at index <span class="thesansmonocd_w5regular_">0</span>) is a dictionary with keys <span class="thesansmonocd_w5regular_">'lat'</span> and <span class="thesansmonocd_w5regular_">'lon'</span>. The values for these keys are float values of the latitude and longitude:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">response_data[0]['lat']</b>
+37.7790262
+&gt;&gt;&gt; <b class="calibre10">response_data[0]['lon']</b>
+-122.419906
+</code></pre>
+<p class="tx">The specific URL used to make an API request is called the <i class="calibre5">endpoint</i>. The f-strings in this example replace the parts in curly brackets with the values of variables. The <span class="thesansmonocd_w5regular_">direct?q={city_name},{state_code},{country_code}&amp;appid={API_key}'</span> in the previous example becomes <span class="thesansmonocd_w5regular_">direct?q=San Francisco,CA,US&amp;appid=30ee784a80d81480dab1749d33980112'</span>.</p>
+<p class="tx">Next, you can use this latitude and longitude information to find the current temperature of San Francisco:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">lat = json.loads(response.text)[0]['lat']</b>
+&gt;&gt;&gt; <b class="calibre10">lon = json.loads(response.text)[0]['lon']</b>
+&gt;&gt;&gt; <b class="calibre10">response = requests.get(f'https://api.openweathermap.org/data/2.5/</b>
+<b class="calibre10">weather?lat={lat}&amp;lon={lon}&amp;appid={API_key}')</b>
+&gt;&gt;&gt; <b class="calibre10">response_data = json.loads(response.text)</b>
+&gt;&gt;&gt; <b class="calibre10">response_data</b>
+{'coord': {'lon': -122.4199, 'lat': 37.779}, 'weather': [{'id': 803,
+<var class="calibre20">--snip--</var>
+'timezone': -25200, 'id': 5391959, 'name': 'San Francisco', 'cod': 200}
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1067" aria-label="299"></span>&gt;&gt;&gt; <b class="calibre10">response_data['main']['temp']</b>
+285.44
+&gt;&gt;&gt; <b class="calibre10">round(285.44 - 273.15, 1)</b>  # Convert Kelvin to Celsius.
+12.3
+&gt;&gt;&gt; <b class="calibre10">round(285.44 * (9 / 5) - 459.67, 1)</b>  # Convert Kelvin to Fahrenheit.
+54.1
+</code></pre>
+<p class="tx">Notice that OpenWeather returns the temperature in Kelvin, so you’ll need to do some math to get the temperature in Celsius or Fahrenheit.</p>
+<p class="tx">Let’s break down the full URL of the geolocation endpoint from the previous example:</p>
+<p class="listplain"><b class="calibre10"><i class="calibre5">https://</i></b> The <i class="calibre5">scheme</i> used to access the server, which is the protocol name (almost always HTTPS for online APIs) followed by a colon and two forward slashes.</p>
+<p class="listplain"><b class="calibre10"><i class="calibre5">api.openweathermap.org</i></b> The domain name of the web server that handles the API request.</p>
+<p class="listplain"><b class="calibre10"><i class="calibre5">/geo/1.0/direct</i></b> The path of the API.</p>
+<p class="listplain"><b class="calibre10"><i class="calibre5">?q={city_name},{state_code},{country_code}&amp;appid={API_key}</i></b> The URL’s query string. The parts inside curly brackets need to be replaced by real values; you can think of them as parameters for a function call. In URL encoding, the parameter name and argument value are separated by an equal sign, and multiple parameter-argument pairs are separated by an ampersand.</p>
+<p class="tx">You can take the endpoint URL (with the completed query string) and paste it into your web browser to view the response text directly. This is often a good practice when you’re first learning how to use an API. The response text for web-based APIs is most often formatted in JSON or XML.</p>
+<p class="tx">To avoid confusion when updating an API, most online services include a version number as part of the URL. Over time, a service may release new versions of the API and deprecate older versions. At this point, you’ll have to update the code in your scripts to continue to make use of them.</p>
+<p class="tx">The free tier of OpenWeather also provides five-day forecasts and information about precipitation, wind, and air pollution. The documentation web pages show you what URLs to access to get this data, as well as the structure of the JSON response for these API calls. The code in the next few sections assumes you’ve run <span class="thesansmonocd_w5regular_">response_data</span> <span class="thesansmonocd_w5regular_">=</span> <span class="thesansmonocd_w5regular_">json.loads(response.text)</span> to convert the text returned from the website into a Python data structure.</p>
+<section type="division" aria-labelledby="sec11">
+<h4 class="h1" id="calibre_link-1777"><span id="calibre_link-326"></span><span class="sans_futura_std_heavy_oblique_bi_">Requesting a Latitude and Longitude</span></h4>
+<p class="tni">The endpoint to get the latitude and longitude coordinates of a city is <i class="calibre5"><a href="https://api.openweathermap.org/geo/1.0/direct?q=%7Bcity_name%7D,%7Bstate_code%7D,%7Bcountry_code%7D&amp;appid=%7BAPI_key%7D" class="calibre1">https://<wbr></wbr>api<wbr></wbr>.openweathermap<wbr></wbr>.org<wbr></wbr>/geo<wbr></wbr>/1<wbr></wbr>.0<wbr></wbr>/direct<wbr></wbr>?q<wbr></wbr>={city<wbr></wbr>_name},{state<wbr></wbr>_code},{country<wbr></wbr>_code}&amp;appid<wbr></wbr>={API<wbr></wbr>_key}</a></i>. The state code refers to the state’s abbreviation and is required only for cities in the United States. The country code is the two- or three-letter ISO 3166 code, listed at <i class="calibre5"><a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes" class="calibre1">https://<wbr></wbr>en<wbr></wbr>.wikipedia<wbr></wbr>.org<wbr></wbr>/wiki<wbr></wbr>/List<wbr></wbr>_of<wbr></wbr>_ISO<wbr></wbr>_3166<wbr></wbr>_country<wbr></wbr>_codes</a></i>. For example, use the code <span class="thesansmonocd_w5regular_">'US'</span> for the United States or <span class="thesansmonocd_w5regular_">'NZ'</span> for New Zealand. After converting the response JSON text <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1778" aria-label="300"></span>into a Python data structure in a variable named <span class="thesansmonocd_w5regular_">response_data</span>, you can retrieve the following information:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data[0]['lat'] </span>Holds the degrees latitude of the city as a float value</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data[0]['lon'] </span>Holds the degrees longitude of the city as a float value</p>
+<p class="tx">If the city name matches multiple responses, the list in <span class="thesansmonocd_w5regular_">response_data</span> will contain different dictionaries at <span class="thesansmonocd_w5regular_">response_data[0]</span>, <span class="thesansmonocd_w5regular_">response_data[1]</span>, and so on. If OpenWeather is unable to locate the city, <span class="thesansmonocd_w5regular_">response_data</span> will be an empty list.</p>
+</section>
+<section type="division" aria-labelledby="sec12">
+<h4 class="h1" id="calibre_link-1779"><span id="calibre_link-327"></span><span class="sans_futura_std_heavy_oblique_bi_">Fetching the Current Weather</span></h4>
+<p class="tni">The endpoint to get current weather information based on some latitude and longitude is <i class="calibre5"><a href="https://api.openweathermap.org/data/2.5/weather?lat=%7Blat%7D&amp;lon=%7Blon%7D%26appid=%7BAPI_key%7D" class="calibre1">https://<wbr></wbr>api<wbr></wbr>.openweathermap<wbr></wbr>.org<wbr></wbr>/data<wbr></wbr>/2<wbr></wbr>.5<wbr></wbr>/weather<wbr></wbr>?lat<wbr></wbr>={lat}&amp;lon<wbr></wbr>={lon}&amp;appid<wbr></wbr>={API<wbr></wbr>_key}</a></i>. After converting the response JSON text into a Python data structure in a variable named <span class="thesansmonocd_w5regular_">response_data</span>, you can retrieve the following information:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['weather'][0]['main'] </span>Holds a string description, such as <span class="thesansmonocd_w5regular_">'Clear'</span>, <span class="thesansmonocd_w5regular_">'Rain'</span>, or <span class="thesansmonocd_w5regular_">'Snow'</span></p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['weather'][0]['description'] </span>Holds a more descriptive string, such as <span class="thesansmonocd_w5regular_">'light rain'</span>, <span class="thesansmonocd_w5regular_">'moderate rain'</span>, or <span class="thesansmonocd_w5regular_">'extreme rain'</span></p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['main']['temp'] </span>Holds the current temperature in Kelvin</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['main']['feels_like'] </span>Holds the human perception of the temperature in Kelvin</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['main']['humidity'] </span>Holds the humidity as a percentage</p>
+<p class="tx">If you supplied an incorrect latitude or longitude argument, <span class="thesansmonocd_w5regular_">response _data</span> will be a dictionary, like <span class="thesansmonocd_w5regular_">{"cod":"400","message":"wrong latitude"}</span>.</p>
+</section>
+<section type="division" aria-labelledby="sec13">
+<h4 class="h1" id="calibre_link-1780"><span id="calibre_link-328"></span><span class="sans_futura_std_heavy_oblique_bi_">Getting a Weather Forecast</span></h4>
+<p class="tni">The endpoint to get a five-day forecast based on some latitude and longitude is <i class="calibre5"><a href="https://api.openweathermap.org/data/2.5/forecast?lat=%7Blat%7D&amp;lon=%7Blon%7D%26appid=%7BAPI_key%7D" class="calibre1">https://<wbr></wbr>api<wbr></wbr>.openweathermap<wbr></wbr>.org<wbr></wbr>/data<wbr></wbr>/2<wbr></wbr>.5<wbr></wbr>/forecast<wbr></wbr>?lat<wbr></wbr>={lat}&amp;lon<wbr></wbr>={lon}&amp;appid<wbr></wbr>={API<wbr></wbr>_key}</a></i>. After converting the response JSON text into a Python data structure in a variable named <span class="thesansmonocd_w5regular_">response_data</span>, you can retrieve the following information:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['list'] </span>Holds a list of dictionaries containing the weather predictions for a given time.</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['list'][0]['dt'] </span>Holds a timestamp in the form of a Unix epoch float. Pass this value as an argument to <span class="thesansmonocd_w5regular_">datetime.datetime.fromtimestamp()</span> to obtain the timestamp as a <span class="thesansmonocd_w5regular_">datetime</span> object. <span>Chapter 19</span> discusses Python’s <span class="thesansmonocd_w5regular_">datetime</span> module in more detail.</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">response_data['list'][0]['main'] </span>Holds a dictionary with keys like <span class="thesansmonocd_w5regular_">'temp'</span>, <span class="thesansmonocd_w5regular_">'feels_like'</span>, <span class="thesansmonocd_w5regular_">'humidity'</span>, and others.</p>
+<p class="listplain"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-908" aria-label="301"></span><span class="sans_thesansmonocd_w7bold_b_">response_data['list'][0]['weather'][0] </span>Holds a dictionary of descriptions with keys like <span class="thesansmonocd_w5regular_">'main'</span>, <span class="thesansmonocd_w5regular_">'description'</span>, and others.</p>
+<p class="tx">The list in <span class="thesansmonocd_w5regular_">response_data['list']</span> holds 40 dictionaries with forecasts at three-hour increments for the next five days, though this may change in future versions of the API.</p>
+</section>
+<section type="division" aria-labelledby="sec14">
+<h4 class="h1" id="calibre_link-1781"><span id="calibre_link-329"></span><span class="sans_futura_std_heavy_oblique_bi_">Exploring APIs</span></h4>
+<p class="tni">Other websites, such as <i class="calibre5"><a href="https://weather.gov" class="calibre1">https://<wbr></wbr>weather<wbr></wbr>.gov</a></i> and <i class="calibre5"><a href="https://www.weatherapi.com/" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.weatherapi<wbr></wbr>.com<wbr></wbr>/</a></i>, provide their own free weather APIs. Every API works differently, but they’re often accessed as requests over HTTPS, in which case you can use the Requests library and return responses formatted as JSON or XML text. However, someone may have created a third-party Python package to make using these APIs easier, with Python functions that handle accessing the endpoints and parsing the response for you. You can find these packages on <i class="calibre5"><a href="https://pypi.org" class="calibre1">https://<wbr></wbr>pypi<wbr></wbr>.org</a></i>; read the package documentation to learn about their use.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec15">
+<h3 class="h" id="calibre_link-1782"><span id="calibre_link-330"></span><span class="sans_futura_std_bold_b_">Understanding HTML</span></h3>
+<p class="tni">Before you pick apart web pages, you must learn some <i class="calibre5">HyperText Markup Language (HTML)</i> basics. HTML is the format in which web pages are written, while <i class="calibre5">Cascading Style Sheets (CSS)</i> are a way to make categorical changes to the look of HTML elements in a web page. This chapter assumes you have some basic experience with HTML, but if you need a beginner tutorial, I suggest one of the following sites:</p>
+<ul class="ul">
+<li class="bl"><i class="calibre5"><a href="https://developer.mozilla.org/en-US/docs/Learn/HTML" class="calibre1">https://<wbr></wbr>developer<wbr></wbr>.mozilla<wbr></wbr>.org<wbr></wbr>/en<wbr></wbr>-US<wbr></wbr>/docs<wbr></wbr>/Learn<wbr></wbr>/HTML</a></i></li>
+<li class="bl"><i class="calibre5"><a href="https://www.freecodecamp.org/news/html-coding-introduction-course-for-beginners" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.freecodecamp<wbr></wbr>.org<wbr></wbr>/news<wbr></wbr>/html<wbr></wbr>-coding<wbr></wbr>-introduction<wbr></wbr>-course<wbr></wbr>-for<wbr></wbr>-beginners</a></i></li>
+<li class="bl"><i class="calibre5"><a href="https://www.khanacademy.org/computing/computer-programming/html-css" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.khanacademy<wbr></wbr>.org<wbr></wbr>/computing<wbr></wbr>/computer<wbr></wbr>-programming<wbr></wbr>/html<wbr></wbr>-css</a></i></li>
+</ul>
+<p class="tx">In this section, you’ll also learn how to access your web browser’s powerful Developer Tools, which make scraping information from the web much easier.</p>
+<section type="division" aria-labelledby="sec16">
+<h4 class="h1" id="calibre_link-1783"><span id="calibre_link-331"></span><span class="sans_futura_std_heavy_oblique_bi_">Exploring the Format</span></h4>
+<p class="tni">An HTML file is a plaintext file with the <i class="calibre5">.html</i> file extension. The text in these files is surrounded by HTML <i class="calibre5">tags</i>, which are words enclosed in angle brackets (<span class="thesansmonocd_w5regular_">&lt;&gt;</span>). The tags tell the browser how to format the web page. A starting tag and closing tag can enclose some text to form an HTML <i class="calibre5">element</i>. The text to display is the content between the starting and closing tags. For example, the following HTML will display <i class="calibre5">Hello, world!</i> in the browser, with <i class="calibre5">Hello</i> in bold:</p>
+<pre class="pre"><code class="calibre9">&lt;b&gt;Hello&lt;/b&gt;, world!</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-940" aria-label="302"></span>In a browser, this HTML will look as shown in Figure 13-1.</p>
+<figure class="img"><img class="img3" id="calibre_link-744" src="images/000011.jpg" alt="A screenshot of a browser open to “file:///C:/index.html”. The rendered content shows the text “Hello, world!” With “Hello” in bold." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-1:</span> <span class="sans_futura_std_book_">Hello, world!</span> <span class="sans_futura_std_book_oblique_i_">rendered in the browser</span></p></figcaption>
+</figure>
+<p class="tx">The opening <span class="thesansmonocd_w5regular_">&lt;b&gt;</span> tag says that the enclosed text will appear in bold. The closing <span class="thesansmonocd_w5regular_">&lt;/b&gt;</span> tag tells the browser where the end of the bold text is. Together, they form an element: <span class="thesansmonocd_w5regular_">&lt;b&gt;Hello&lt;/b&gt;</span>.</p>
+<p class="tx">There are many different tags in HTML. Some of these tags have extra properties in the form of <i class="calibre5">attributes</i> within the angle brackets. For example, the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> tag encloses text that should be a link, and the <span class="thesansmonocd_w5regular_">href</span> attribute determines what URL to link to. Here’s an example:</p>
+<pre class="pre"><code class="calibre9">&lt;a href="https://inventwithpython.com”&gt;This text is a link&lt;/a&gt;</code></pre>
+<p class="tx">Some elements have an <span class="thesansmonocd_w5regular_">id</span> attribute used to uniquely identify the element in the page. You’ll often instruct your programs to seek out an element by its <span class="thesansmonocd_w5regular_">id</span> attribute, so finding this attribute using the browser’s Developer Tools is a common task when writing web scraping programs.</p>
+</section>
+<section type="division" aria-labelledby="sec17">
+<h4 class="h1" id="calibre_link-1784"><span id="calibre_link-332"></span><span class="sans_futura_std_heavy_oblique_bi_">Viewing a Web Page’s Source</span></h4>
+<p class="tni">You’ll need to look at the HTML of the web pages your programs will work with, called the <i class="calibre5">source</i>. To do this, right-click any web page in your web browser (or <small class="calibre4">CTRL</small>-click it on macOS), and select <b class="calibre10">View Source</b> or <b class="calibre10">View page source</b> (Figure 13-2). The source is the text your browser actually receives. The browser knows how to display, or <i class="calibre5">render</i>, the web page from this HTML.</p>
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-980" aria-label="303"></span>
+<figure class="img"><img class="img1" id="calibre_link-745" src="images/000012.jpg" alt="At top, a screenshot of a web page with the right-click menu open and “View page source” highlighted. At bottom, a window containing HTML source code." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-2: Viewing the source of a web page</span></p></figcaption>
+</figure>
+<p class="tx">Go ahead and view the source HTML of some of your favorite sites. It’s fine if you don’t fully understand what you’re seeing. You won’t need HTML mastery to write simple web scraping programs. You just need enough knowledge to pick out data from an existing site.</p>
+</section>
+<section type="division" aria-labelledby="sec18">
+<h4 class="h1" id="calibre_link-1785"><span id="calibre_link-333"></span><span class="sans_futura_std_heavy_oblique_bi_">Opening Your Browser’s Developer Tools</span></h4>
+<p class="tni">In addition to viewing a web page’s source, you can look through a page’s HTML using your browser’s Developer Tools. In Firefox, Chrome, and Microsoft Edge, you can press F12 to make the tools appear (Figure 13-3). Pressing F12 again will make them disappear.</p>
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1196" aria-label="304"></span>
+<figure class="img"><img class="img1" id="calibre_link-746" src="images/000013.jpg" alt="A screenshot of the web page at weather.gov with the Developer tools open in a bottom pane showing the page’s HTML source code." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-3: The Developer Tools window in the Chrome browser</span></p></figcaption>
+</figure>
+<p class="tx">Right-click any part of the web page and select <b class="calibre10">Inspect Element</b> from the context menu to bring up the HTML responsible for that part of the page. This will help you parse HTML for your web scraping programs.</p>
+<aside class="box" aria-label="box-16">
+<p class="bt" id="calibre_link-1786"><span class="sans_futura_std_bold_b_">DON’T USE REGULAR EXPRESSIONS TO PARSE HTML</span></p>
+<p class="btni"><span class="sans_futura_std_book_">Locating a specific piece of HTML (or a piece of XML, JSON, TOML, or YAML) in a string seems like a perfect case for regular expressions. However, I advise you not to do this. HTML can be formatted in many ways and still be considered valid, but trying to capture all these possible variations in a regular expression is tedious and error prone. Using a module developed specifically for parsing HTML, such as</span> <span class="thesansmonocd_w5regular_">bs4</span><span class="sans_futura_std_book_">, is less likely to result in bugs.</span></p>
+<p class="boxb-last"><span class="sans_futura_std_book_">You can find an extended argument for why you shouldn’t parse HTML with regular expressions at</span> <span class="sans_futura_std_book_oblique_i_"><a href="https://stackoverflow.com/a/1732454/1893164." class="calibre1">https://<wbr></wbr>stackoverflow<wbr></wbr>.com<wbr></wbr>/a<wbr></wbr>/1732454<wbr></wbr>/1893164</a>.</span></p>
+</aside>
+</section>
+<section type="division" aria-labelledby="sec19">
+<h4 class="h1" id="calibre_link-1787"><span id="calibre_link-334"></span><span class="sans_futura_std_heavy_oblique_bi_">Finding HTML Elements</span></h4>
+<p class="tni">Once your program has downloaded a web page using the <span class="thesansmonocd_w5regular_">requests</span> module, you’ll have the page’s HTML content as a single string value. Now you need to figure out which part of the HTML corresponds to the information on the web page you’re interested in.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1788" aria-label="305"></span>This is where the browser’s Developer Tools can help. Say you want to write a program to pull weather forecast data from <i class="calibre5"><a href="https://weather.gov" class="calibre1">https://<wbr></wbr>weather<wbr></wbr>.gov</a></i>. Before writing any code, do a little research. If you visit the site and search for the 94105 ZIP code, it should take you to a page showing the forecast for that area.</p>
+<p class="tx">What if you’re interested in scraping the weather information for that ZIP code? Right-click that information on the page (or <small class="calibre4">CTRL</small>-click on macOS) and select <b class="calibre10">Inspect Element</b> from the context menu that appears. This brings up the Developer Tools window, which shows you the HTML that produces that particular part of the web page. Figure 13-4 shows the Developer Tools open to the HTML of the nearest forecast. Note that if the <i class="calibre5"><a href="https://weather.gov" class="calibre1">https://<wbr></wbr>weather<wbr></wbr>.gov</a></i> site changes the design of its web pages, you’ll need to repeat this process to inspect the new elements.</p>
+<figure class="img"><img class="img1" id="calibre_link-747" src="images/000014.jpg" alt="A screenshot of the webpage at weather.gov with the Developer tools open in a bottom pane showing the page’s HTML source code. In the developer tools, a &lt;div&gt; HTML element is highlighted, populating another pane with details about it." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-4: Inspecting the element that holds forecast text</span></p></figcaption>
+</figure>
+<p class="tx">From the Developer Tools, you can see that the HTML responsible for the forecast part of the web page is this:</p>
+<pre class="pre"><code class="calibre9">&lt;div class="col-sm-10 forecast-text"&gt;Sunny, with a high near 64.
+West wind 11 to 16 mph, with gusts as high as 21 mph.&lt;/div&gt;
+</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-912" aria-label="306"></span>This is exactly what you were looking for! It seems that the forecast information is contained inside a <span class="thesansmonocd_w5regular_">&lt;div&gt;</span> element with the <span class="thesansmonocd_w5regular_">forecast-text</span> CSS class.</p>
+<p class="tx">Right-click this element in the browser’s developer console and, from the context menu that appears, select <b class="calibre10">Copy</b><span class="listbullet_menuarrow"></span><b class="calibre10">CSS Selector</b>. This option copies a string such as <span class="thesansmonocd_w5regular_">'div.row-odd:nth-child(1) &gt; div:nth-child(2)'</span> to the clipboard. You can pass it to Beautiful Soup’s <span class="thesansmonocd_w5regular_">select()</span> method or Selenium’s <span class="thesansmonocd_w5regular_">find_element()</span> method, as explained later in this chapter, to find the element in the string.</p>
+<p class="tx">The <i class="calibre5">CSS selector</i> syntax used in this string specifies which HTML elements to retrieve from a web page. The full selector syntax is beyond the scope of this book, but you can obtain the selector from the browser Developer Tools, as we did here. <i class="calibre5">XPath</i> is another syntax for selecting HTML elements, but is also beyond the scope of this book.</p>
+<p class="tx">Keep in mind that when a website changes its layout, you’ll need to update the HTML tags your scripts check. This can happen with little or no warning, so be sure to keep an eye on your program in case it suddenly displays errors about not being able to find elements. In general, it’s better to use a website’s API if it offers one, as it’s much less likely to change than the website itself.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec20">
+<h3 class="h" id="calibre_link-1789"><span id="calibre_link-335"></span><span class="sans_futura_std_bold_b_">Parsing HTML with Beautiful Soup</span></h3>
+<p class="tni">Beautiful Soup is a package for extracting information from an HTML page. You’ll use the name <span class="thesansmonocd_w5regular_">beautifulsoup4</span> to install the package but the shorter module name <span class="thesansmonocd_w5regular_">bs4</span> to import it. In this section, we’ll use Beautiful Soup to <i class="calibre5">parse</i> (that is, analyze and extract the parts of) the HTML file at <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i>, which has the following content:</p>
+<pre class="pre"><code class="calibre9">&lt;!-- This is an HTML comment. --&gt;
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Example Website Title&lt;/title&gt;
+    &lt;style&gt;
+        .slogan {
+            color: gray;
+            font-size: 2em;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Example Website&lt;/h1&gt;
+    &lt;p&gt;This &lt;p&gt; tag puts &lt;b&gt;content&lt;/b&gt; into a &lt;i&gt;single&lt;/i&gt; paragraph.&lt;/p&gt;
+    &lt;p&gt;&lt;a href="https://inventwithpython.com”&gt;This text is a link&lt;/a&gt; to books by &lt;span id=
+"author"&gt;Al Sweigart&lt;/span&gt;.&lt;/p&gt;
+    &lt;p&gt;&lt;img src="wow_such_zophie_thumb.webp" alt="Close-up of my cat Zophie." /&gt;&lt;/p&gt;
+    &lt;p class="slogan"&gt;Learn to program in Python!&lt;/p&gt;
+    &lt;form&gt;
+        &lt;p&gt;&lt;label&gt;Username: &lt;input id="login_user" placeholder="admin" /&gt;&lt;/label&gt;&lt;/p&gt;
+        &lt;p&gt;&lt;label&gt;Password: &lt;input id="login_pass" type="password" placeholder="swordfish" /&gt;
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-957" aria-label="307"></span>    &lt;/form&gt;
+&lt;/label&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;label&gt;Agree to disagree: &lt;input type="checkbox" /&gt;&lt;/label&gt;&lt;input type="submit"
+value="Fake Button" /&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p class="tx">Note that the login form on this page is fake and is included for cosmetic value.</p>
+<p class="tx">Even a simple HTML file involves many different tags and attributes, and matters quickly get confusing when it comes to complex websites. Thankfully, Beautiful Soup makes working with HTML much easier.</p>
+<section type="division" aria-labelledby="sec21">
+<h4 class="h1" id="calibre_link-1790"><span id="calibre_link-336"></span><span class="sans_futura_std_heavy_oblique_bi_">Creating a Beautiful Soup Object</span></h4>
+<p class="tni">The <span class="thesansmonocd_w5regular_">bs4.BeautifulSoup()</span> function accepts a string containing the HTML it will parse, then returns a <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object. For example, enter the following into the interactive shell while your computer is connected to the internet:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import requests, bs4</b>
+&gt;&gt;&gt; <b class="calibre10">res = requests.get('https://autbor.com/example3.html')</b>
+&gt;&gt;&gt; <b class="calibre10">res.raise_for_status()</b>
+&gt;&gt;&gt; <b class="calibre10">example_soup = bs4.BeautifulSoup(res.text, 'html.parser')</b>
+&gt;&gt;&gt; <b class="calibre10">type(example_soup)</b>
+&lt;class 'bs4.BeautifulSoup'&gt;
+</code></pre>
+<p class="tx">This code uses <span class="thesansmonocd_w5regular_">requests.get()</span> to download the main page of the Automate the Boring Stuff website and then passes the response’s <span class="thesansmonocd_w5regular_">text</span> attribute to <span class="thesansmonocd_w5regular_">bs4.BeautifulSoup()</span>. Beautiful Soup can parse different formats, and the <span class="thesansmonocd_w5regular_">'html.parser'</span> argument tells it that we are parsing HTML. Finally, the code stores the returned <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object in a variable named <span class="thesansmonocd_w5regular_">example_soup</span>.</p>
+<p class="tx">You can also load an HTML file from your hard drive by passing a <span class="thesansmonocd_w5regular_">File</span> object to <span class="thesansmonocd_w5regular_">bs4.BeautifulSoup()</span>. Enter the following into the interactive shell (after making sure the <i class="calibre5">example3.html</i> file is in the working directory):</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import bs4</b>
+&gt;&gt;&gt; <b class="calibre10">with open('example3.html') as example_file:</b>
+...     <b class="calibre10">example_soup = bs4.BeautifulSoup(example_file, 'html.parser')</b>
+...
+&gt;&gt;&gt; <b class="calibre10">type(example_soup)</b>
+&lt;class 'bs4.BeautifulSoup'&gt;
+</code></pre>
+<p class="tx">Once you have a <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object, you can use its methods to locate specific parts of an HTML document.</p>
+</section>
+<section type="division" aria-labelledby="sec22">
+<h4 class="h1" id="calibre_link-1791"><span id="calibre_link-337"></span><span class="sans_futura_std_heavy_oblique_bi_">Finding an Element</span></h4>
+<p class="tni">You can retrieve a web page element from a <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object by calling its <span class="thesansmonocd_w5regular_">select()</span> method and passing a CSS selector string for the element you’re looking for. The method returns a list of <span class="thesansmonocd_w5regular_">Tag</span> objects, which represent <span role="doc-pagebreak" type="pagebreak" id="calibre_link-941" aria-label="308"></span>matching HTML elements. Table 13-2 shows examples of the most common CSS selector patterns using <span class="thesansmonocd_w5regular_">select()</span>.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-748"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-2:</span></span> <span class="sans_futura_std_book_">Examples of CSS Selectors</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Selector passed to the select() method</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Will match ...</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('div')</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">All elements named</span> <span class="thesansmonocd_w5regular_">&lt;div&gt;</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('#author')</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The element with an</span> <span class="thesansmonocd_w5regular_">id</span> <span class="sans_futura_std_book_">attribute of</span> <span class="thesansmonocd_w5regular_">author</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('.notice')</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">All elements that use a CSS</span> <span class="thesansmonocd_w5regular_">class</span> <span class="sans_futura_std_book_">attribute named</span> <span class="thesansmonocd_w5regular_">notice</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('div span')</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">All elements named</span> <span class="thesansmonocd_w5regular_">&lt;span&gt;</span> <span class="sans_futura_std_book_">that are within an element named</span> <span class="thesansmonocd_w5regular_">&lt;div&gt;</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('div &gt; span')</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">All elements named</span> <span class="thesansmonocd_w5regular_">&lt;span&gt;</span> <span class="sans_futura_std_book_">that are</span> <span class="sans_futura_std_book_oblique_i_">directly</span> <span class="sans_futura_std_book_">within an element named</span> <span class="thesansmonocd_w5regular_">&lt;div&gt;</span><span class="sans_futura_std_book_">, with no other element in between</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('input[name]')</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">All elements named</span> <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> <span class="sans_futura_std_book_">that have a</span> <span class="thesansmonocd_w5regular_">name</span> <span class="sans_futura_std_book_">attribute with any value</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tbl"><p class="tch1"><span class="thesansmonocd_w5regular_">soup.select('input[type="button"]')</span></p></td>
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">All elements named</span> <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> <span class="sans_futura_std_book_">that have an attribute named</span> <span class="thesansmonocd_w5regular_">type</span> <span class="sans_futura_std_book_">with the value</span> <span class="thesansmonocd_w5regular_">button</span></p></td>
+</tr>
+</tbody>
+</table>
+<p class="tx">You can combine the various selector patterns to make sophisticated matches. For example, <span class="thesansmonocd_w5regular_">soup.select('p #author')</span> matches any element that has an <span class="thesansmonocd_w5regular_">id</span> attribute of <span class="thesansmonocd_w5regular_">author</span>, as long as it’s also inside a <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> element.</p>
+<p class="tx">You can pass tag values to the <span class="thesansmonocd_w5regular_">str()</span> function to show the HTML tags they represent. Tag values also have an <span class="thesansmonocd_w5regular_">attrs</span> attribute containing all their HTML attributes as a dictionary. For example, download the <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i> page as <i class="calibre5">example3.html</i>, then enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import bs4</b>
+&gt;&gt;&gt; <b class="calibre10">example_file = open('example3.html')</b>
+&gt;&gt;&gt; <b class="calibre10">example_soup = bs4.BeautifulSoup(example_file.read(), 'html.parser')</b>
+&gt;&gt;&gt; <b class="calibre10">elems = example_soup.select('#author')</b>
+&gt;&gt;&gt; <b class="calibre10">type(elems)</b> # elems is a list of Tag objects.
+&lt;class 'bs4.element.ResultSet'&gt;
+&gt;&gt;&gt; <b class="calibre10">len(elems)</b>
+1
+&gt;&gt;&gt; <b class="calibre10">type(elems[0])</b>
+&lt;class 'bs4.element.Tag'&gt;
+&gt;&gt;&gt; <b class="calibre10">str(elems[0])</b>  # The Tag object as a string
+'&lt;span id="author"&gt;Al Sweigart&lt;/span&gt;'
+&gt;&gt;&gt; <b class="calibre10">elems[0].get_text()</b>  # The inner text of the element
+'Al Sweigart'
+&gt;&gt;&gt; <b class="calibre10">elems[0].attrs</b>
+{'id': 'author'}
+</code></pre>
+<p class="tx">This code finds the element with <span class="thesansmonocd_w5regular_">id="author"</span> in our example HTML. We use <span class="thesansmonocd_w5regular_">select('#author')</span> to return a list of all the elements with <span class="thesansmonocd_w5regular_">id="author"</span>. We then store this list of <span class="thesansmonocd_w5regular_">Tag</span> objects in the variable <span class="thesansmonocd_w5regular_">elems</span>. Running <span class="thesansmonocd_w5regular_">len(elems)</span> tells us there is one <span class="thesansmonocd_w5regular_">Tag</span> object in the list, meaning there was one match.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1177" aria-label="309"></span>Passing the element to <span class="thesansmonocd_w5regular_">str()</span> returns a string with the starting and closing tags and the element’s text. Calling <span class="thesansmonocd_w5regular_">get_text()</span> on the element returns the element’s text, or the content between the opening and closing tags: in this case, <span class="thesansmonocd_w5regular_">'Al Sweigart'</span>. Finally, <span class="thesansmonocd_w5regular_">attrs</span> gives us a dictionary with the element’s attribute, <span class="thesansmonocd_w5regular_">'id'</span>, and the value of the <span class="thesansmonocd_w5regular_">id</span> attribute, <span class="thesansmonocd_w5regular_">'author'</span>.</p>
+<p class="tx">You can also pull all the <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> elements from the <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object. Enter this into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">p_elems = example_soup.select('p')</b>
+&gt;&gt;&gt; <b class="calibre10">str(p_elems[0])</b>
+'&lt;p&gt;This &lt;p&gt; tag puts &lt;b&gt;content&lt;/b&gt; into a &lt;i&gt;single&lt;/i&gt; paragraph.&lt;/p&gt;'
+&gt;&gt;&gt; <b class="calibre10">p_elems[0].get_text()</b>
+'This &lt;p&gt; tag puts content into a single paragraph.'
+&gt;&gt;&gt; <b class="calibre10">str(p_elems[1])</b>
+'&lt;p&gt; &lt;a href="https://inventwithpython.com/”&gt;This text is a link&lt;/a&gt; to books by
+&lt;span id="author"&gt;Al Sweigart&lt;/span&gt;.&lt;/p&gt;'
+&gt;&gt;&gt; <b class="calibre10">p_elems[1].get_text()</b>
+'This text is a link to books by Al Sweigart.'
+&gt;&gt;&gt; <b class="calibre10">str(p_elems[2])</b>
+'&lt;p&gt;&lt;img alt="Close-up of my cat Zophie." src="wow_such_zophie_thumb.webp"/&gt;&lt;/p&gt;'
+&gt;&gt;&gt; <b class="calibre10">p_elems[2].get_text()</b>
+''
+</code></pre>
+<p class="tx">This time, <span class="thesansmonocd_w5regular_">select()</span> gives us a list of three matches, which we store in <span class="thesansmonocd_w5regular_">p_elems</span>. Using <span class="thesansmonocd_w5regular_">str()</span> on <span class="thesansmonocd_w5regular_">p_elems[0]</span>, <span class="thesansmonocd_w5regular_">p_elems[1]</span>, and <span class="thesansmonocd_w5regular_">p_elems[2]</span> shows you each element as a string, and using <span class="thesansmonocd_w5regular_">get_text()</span> on each element shows you its text.</p>
+</section>
+<section type="division" aria-labelledby="sec23">
+<h4 class="h1" id="calibre_link-1792"><span id="calibre_link-338"></span><span class="sans_futura_std_heavy_oblique_bi_">Getting Data from an Element’s Attributes</span></h4>
+<p class="tni">The <span class="thesansmonocd_w5regular_">get()</span> method for <span class="thesansmonocd_w5regular_">Tag</span> objects lets you access HTML attribute values from an element. You’ll pass the method an attribute name as a string and receive that attribute’s value. Using <i class="calibre5">example3.html</i> from <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i>, enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">import bs4</b>
+&gt;&gt;&gt; <b class="calibre10">soup = bs4.BeautifulSoup(open('example3.html'), 'html.parser')</b>
+&gt;&gt;&gt; <b class="calibre10">span_elem = soup.select('span')[0]</b>
+&gt;&gt;&gt; <b class="calibre10">str(span_elem)</b>
+'&lt;span id="author"&gt;Al Sweigart&lt;/span&gt;'
+&gt;&gt;&gt; <b class="calibre10">span_elem.get('id')</b>
+'author'
+&gt;&gt;&gt; <b class="calibre10">span_elem.get('some_nonexistent_addr') == None</b>
+True
+&gt;&gt;&gt; <b class="calibre10">span_elem.attrs</b>
+{'id': 'author'}
+</code></pre>
+<p class="tx">Here, we use <span class="thesansmonocd_w5regular_">select()</span> to find any <span class="thesansmonocd_w5regular_">&lt;span&gt;</span> elements and then store the first matched element in <span class="thesansmonocd_w5regular_">span_elem</span>. Passing the attribute name <span class="thesansmonocd_w5regular_">'id'</span> to <span class="thesansmonocd_w5regular_">get()</span> returns the attribute’s value, <span class="thesansmonocd_w5regular_">'author'</span>.</p>
+<p class="ph"><span id="calibre_link-339"></span><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1251" aria-label="310"></span><span class="sans_futura_std_heavy_b_">Project 7: Open All Search Results</span></p>
+<p class="tni">When I look up a topic on a search engine, I don’t look at just one search result at a time. By <i class="calibre5">middle-clicking</i> a search result link (or clicking it while holding <small class="calibre4">CTRL</small>), I open the first several links in a bunch of new tabs to read later. I search the internet often enough that this workflow&mdash;opening my browser, searching for a topic, and middle-clicking several links one by one&mdash;is tedious. It would be nice if I could simply enter a term on the command line and have my computer automatically open the top search results in new browser tabs.</p>
+<p class="tx">Let’s write a script to do this for the search results page of the Python Package Index at <i class="calibre5"><a href="https://pypi.org" class="calibre1">https://<wbr></wbr>pypi<wbr></wbr>.org</a></i>. You could adapt a program like this to many other websites, although Google, DuckDuckGo, Amazon, and other large websites often employ measures that make scraping their search results pages difficult.</p>
+<p class="tx">This is what the program should do:</p>
+<ul class="ul">
+<li class="bl">Get search keywords from the command line arguments</li>
+<li class="bl">Retrieve the search results page</li>
+<li class="bl">Open a browser tab for each result</li>
+</ul>
+<p class="tx">This means your code needs to do the following:</p>
+<ul class="ul">
+<li class="bl">Read the command line arguments from <span class="thesansmonocd_w5regular_">sys.argv</span>.</li>
+<li class="bl">Fetch the search results page with the <span class="thesansmonocd_w5regular_">requests</span> module.</li>
+<li class="bl">Find the links to each search result.</li>
+<li class="bl">Call the <span class="thesansmonocd_w5regular_">webbrowser.open()</span> function to open the web browser.</li>
+</ul>
+<p class="tx">Open a new file editor tab and save it as <i class="calibre5">searchpypi.py</i>.</p>
+</section>
+<section type="division" aria-labelledby="sec24">
+<h4 class="h1" id="calibre_link-1793"><span id="calibre_link-340"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 1: Get the Search Page</span></h4>
+<p class="tni">Before writing code, you first need to know the URL of the search results page. By looking at the browser’s address bar after doing a search, you can see that the results page has a URL that looks like this: <i class="calibre5"><a href="https://pypi.org/search/?q=%3CSEARCH_TERM_HERE%3E" class="calibre1">https://<wbr></wbr>pypi<wbr></wbr>.org<wbr></wbr>/search<wbr></wbr>/<wbr></wbr>?q<wbr></wbr>=&lt;SEARCH<wbr></wbr>_TERM<wbr></wbr>_HERE&gt;</a></i>. The <span class="thesansmonocd_w5regular_">requests</span> module can download this page; then, you can use Beautiful Soup to find the search result links in the HTML. Finally, you’ll use the <span class="thesansmonocd_w5regular_">webbrowser</span> module to open those links in browser tabs.</p>
+<p class="tx">Make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># searchpypi.py - Opens several search results on pypi.org
+
+import requests, sys, webbrowser, bs4
+
+print('Searching...')  # Display text while downloading the search results page.
+res = requests.get('https://pypi.org/search/?q=' + ' '.join(sys.argv[1:]))
+res.raise_for_status()
+
+# TODO: Retrieve top search result links.
+
+# TODO: Open a browser tab for each result.
+</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1794" aria-label="311"></span>The user will specify the search terms as command line arguments when launching the program, and the code stores these arguments as strings in a list in <span class="thesansmonocd_w5regular_">sys.argv</span>.</p>
+</section>
+<section type="division" aria-labelledby="sec25">
+<h4 class="h1" id="calibre_link-1795"><span id="calibre_link-341"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 2: Find All Results</span></h4>
+<p class="tni">Now you need to use Beautiful Soup to extract the top search result links from your downloaded HTML. But how do you figure out the right selector for the job? For example, you can’t just search for all <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> tags, because there are lots of links you don’t care about in the HTML. Instead, you must inspect the search results page with the browser’s Developer Tools to try to find a selector that will pick out only the links you want.</p>
+<p class="tx">After doing a search for <i class="calibre5">pyautogui</i>, you can open the browser’s Developer Tools and inspect some of the link elements on the page. They can look complicated, like pages of this: <span class="thesansmonocd_w5regular_">&lt;a class="package-snippet" href="/project/pyautogui" &gt;</span>. But it doesn’t matter that the element looks incredibly complicated. You just need to find the pattern that all the search result links have.</p>
+<p class="tx">Make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># searchpypi.py - Opens several search results on pypi.org
+import requests, sys, webbrowser, bs4
+<var class="calibre20">--snip--</var>
+# Retrieve top search result links.
+<b class="calibre10">soup = bs4.BeautifulSoup(res.text, 'html.parser')</b>
+# Open a browser tab for each result.
+<b class="calibre10">link_elems = soup.select('.package-snippet')</b>
+</code></pre>
+<p class="tx">If you look at the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> elements, you’ll see that the search result links all have <span class="thesansmonocd_w5regular_">class="package-snippet"</span>. Looking through the rest of the HTML source, it looks like the <span class="thesansmonocd_w5regular_">package-snippet</span> class is used only for search result links. You don’t have to know what the CSS class <span class="thesansmonocd_w5regular_">package-snippet</span> is or what it does. You’re just going to use it as a marker for the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element you’re looking for.</p>
+<p class="tx">You can create a <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object from the downloaded page’s HTML text and then use the selector <span class="thesansmonocd_w5regular_">'.package-snippet'</span> to find all <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> elements that are within an element that has the <span class="thesansmonocd_w5regular_">package-snippet</span> CSS class. Note that if the PyPI website changes its layout, you may need to update this program with a new CSS selector string to pass to <span class="thesansmonocd_w5regular_">soup.select()</span>. The rest of the program should remain up-to-date.</p>
+</section>
+<section type="division" aria-labelledby="sec26">
+<h4 class="h1" id="calibre_link-1796"><span id="calibre_link-342"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 3: Open Web Browsers for Each Result</span></h4>
+<p class="tni">Finally, you must tell the program to open web browser tabs for the results. Add the following to the end of your program:</p>
+<pre class="pre"><code class="calibre9"># searchpypi.py - Opens several search results on pypi.org
+import requests, sys, webbrowser, bs4
+--<var class="calibre20">snip</var>--
+# Open a browser tab for each result.
+link_elems = soup.select('.package-snippet')
+<b class="calibre10">num_open = min(5, len(link_elems))</b>
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1121" aria-label="312"></span><b class="calibre10">for i in range(num_open):</b>
+<b class="calibre10">    url_to_open = 'https://pypi.org' + link_elems[i].get('href')</b>
+<b class="calibre10">    print('Opening', url_to_open)</b>
+<b class="calibre10">    webbrowser.open(url_to_open)</b>
+</code></pre>
+<p class="tx">By default, the program opens the first five search results in new tabs using the <span class="thesansmonocd_w5regular_">webbrowser</span> module. However, the user may have searched for something that turned up fewer than five results. The <span class="thesansmonocd_w5regular_">soup.select()</span> call returns a list of all the elements that matched your <span class="thesansmonocd_w5regular_">'.package-snippet'</span> selector, so the number of tabs you want to open is either <span class="thesansmonocd_w5regular_">5</span> or the length of this list (whichever is smaller).</p>
+<p class="tx">The built-in Python function <span class="thesansmonocd_w5regular_">min()</span> returns the smallest of the integer or float arguments it is passed. (There is also a built-in <span class="thesansmonocd_w5regular_">max()</span> function that returns the largest argument it is passed.) You can use <span class="thesansmonocd_w5regular_">min()</span> to find out whether there are fewer than five links in the list and store the number of links to open in a variable named <span class="thesansmonocd_w5regular_">num_open</span>. Then, you can run through a <span class="thesansmonocd_w5regular_">for</span> loop by calling <span class="thesansmonocd_w5regular_">range(num_open)</span>.</p>
+<p class="tx">On each iteration of the loop, the code uses <span class="thesansmonocd_w5regular_">webbrowser.open()</span> to open a new tab in the web browser. Note that the <span class="thesansmonocd_w5regular_">href</span> attribute’s value in the returned <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> elements don’t have the initial <i class="calibre5"><a href="https://pypi.org" class="calibre1">https://<wbr></wbr>pypi<wbr></wbr>.org</a></i> part, so you have to concatenate that to the <span class="thesansmonocd_w5regular_">href</span> attribute’s string value.</p>
+<p class="tx">Now you can instantly open the first five PyPI search results for, say, <i class="calibre5">boring stuff</i> by running <span class="thesansmonocd_w5regular_">searchpypi boring stuff</span> on the command line! See <span>Chapter 12</span> for how to easily run programs on your operating system.</p>
+</section>
+<section type="division" aria-labelledby="sec27">
+<h4 class="h1"><span id="calibre_link-1797"></span><span id="calibre_link-343"></span><span class="sans_futura_std_heavy_oblique_bi_">Ideas for Similar Programs</span></h4>
+<p class="tni">The benefit of tabbed browsing is that you can easily open links in new tabs to peruse later. A program that automatically opens several links at once can be a nice shortcut to do the following:</p>
+<ul class="ul">
+<li class="bl">Open all the product pages after searching a shopping site such as Amazon.</li>
+<li class="bl">Open all the links to reviews for a single product.</li>
+<li class="bl">Open the result links to photos after performing a search on a photo site such as Flickr or Imgur.</li>
+</ul>
+<p class="ph"><span id="calibre_link-344"></span><span class="sans_futura_std_heavy_b_">Project 8: Download XKCD Comics</span></p>
+<p class="tni">Blogs, web comics, and other regularly updating websites usually have a front page with the most recent post, as well as a Previous button on the page that takes you to the previous post. That post will also have a Previous button, and so on, creating a trail from the most recent page to the first post on the site. If you wanted a copy of the site’s content to read when you’re not online, you could manually navigate over every page and save each one. But this is pretty boring work, so let’s write a program to do it instead.</p>
+<p class="tx">XKCD, shown in Figure 13-5, is a popular geek webcomic with a website that fits this structure. The front page at <i class="calibre5"><a href="https://xkcd.com" class="calibre1">https://<wbr></wbr>xkcd<wbr></wbr>.com</a></i> has a Prev button <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1124" aria-label="313"></span>that guides the user back through prior comics. Downloading each comic by hand would take forever, but you can write a script to do this in a couple of minutes.</p>
+<figure class="img"><img class="img1" id="calibre_link-749" src="images/000015.jpg" alt="An excerpt of a comic featuring simple stick figures and text." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-5: XKCD, “a webcomic of romance, sarcasm, math, and language”</span></p></figcaption>
+</figure>
+<p class="tx">Here’s what your program should do:</p>
+<ul class="ul">
+<li class="bl">Load the XKCD home page.</li>
+<li class="bl">Save the comic image on that page.</li>
+<li class="bl">Follow the Previous Comic link.</li>
+<li class="bl">Repeat until it reaches the first comic or the max download limit.</li>
+</ul>
+<p class="tx">This means your code will need to do the following:</p>
+<ul class="ul">
+<li class="bl">Download pages with the <span class="thesansmonocd_w5regular_">requests</span> module.</li>
+<li class="bl">Find the URL of the comic image for a page using Beautiful Soup.</li>
+<li class="bl">Download and save the comic image to the hard drive with <span class="thesansmonocd_w5regular_">iter_content()</span>.</li>
+<li class="bl">Find the URL of the Previous Comic link, and repeat.</li>
+</ul>
+<p class="tx">Open a new file editor tab and save it as <i class="calibre5">downloadXkcdComics.py</i>.</p>
+</section>
+<section type="division" aria-labelledby="sec28">
+<h4 class="h1" id="calibre_link-1798"><span id="calibre_link-345"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 1: Design the Program</span></h4>
+<p class="tni">If you open the browser’s Developer Tools and inspect the elements on the page, you should find the following to be true:</p>
+<ul class="ul">
+<li class="bl">The <span class="thesansmonocd_w5regular_">src</span> attribute of an <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element stores the URL of the comic’s image file.</li>
+<li class="bl">The <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element is inside a <span class="thesansmonocd_w5regular_">&lt;div id="comic"&gt;</span> element.</li>
+<li class="bl"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1799" aria-label="314"></span>The Prev button has a <span class="thesansmonocd_w5regular_">rel</span> HTML attribute with the value <span class="thesansmonocd_w5regular_">prev</span>.</li>
+<li class="bl">The oldest comic’s Prev button links to the <i class="calibre5"><a href="https://xkcd.com/#" class="calibre1">https://<wbr></wbr>xkcd<wbr></wbr>.com<wbr></wbr>/#</a></i> URL, indicating that there are no more previous pages.</li>
+</ul>
+<p class="tx">To prevent the readers of this book from eating up too much of the XKCD website’s bandwidth, let’s limit the number of downloads we make to 10 by default. Make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># downloadXkcdComics.py - Downloads XKCD comics
+
+import requests, os, bs4, time
+
+url = 'https://xkcd.com'  # Starting URL
+os.makedirs('xkcd', exist_ok=True)  # Store comics in ./xkcd
+num_downloads = 0
+MAX_DOWNLOADS = 10
+while not url.endswith('#') and num_downloads &lt; MAX_DOWNLOADS:
+    # TODO: Download the page.
+
+    # TODO: Find the URL of the comic image.
+
+    # TODO: Download the image.
+
+    # TODO: Save the image to ./xkcd.
+
+    # TODO: Get the Prev button's url.
+
+print('Done.')
+</code></pre>
+<p class="tx">The program creates a <span class="thesansmonocd_w5regular_">url</span> variable that starts with the value <span class="thesansmonocd_w5regular_">'https://xkcd.com'</span> and repeatedly updates it (in a <span class="thesansmonocd_w5regular_">while</span> loop) with the URL of the current page’s Prev link. At every step in the loop, you’ll download the comic at <span class="thesansmonocd_w5regular_">url</span>. The loop stops when <span class="thesansmonocd_w5regular_">url</span> ends with <span class="thesansmonocd_w5regular_">'#'</span> or you have downloaded <span class="thesansmonocd_w5regular_">MAX_DOWNLOADS</span> comics.</p>
+<p class="tx">You’ll download the image files to a folder in the current working directory named <i class="calibre5">xkcd</i>. The call <span class="thesansmonocd_w5regular_">os.makedirs()</span> ensures that this folder exists, and the <span class="thesansmonocd_w5regular_">exist_ok=True</span> keyword argument prevents the function from throwing an exception if this folder has already been created.</p>
+</section>
+<section type="division" aria-labelledby="sec29">
+<h4 class="h1" id="calibre_link-1800"><span id="calibre_link-346"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 2: Download the Web Page</span></h4>
+<p class="tni">Let’s implement the code for downloading the page. Make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># downloadXkcdComics.py - Downloads XKCD comics
+
+import requests, os, bs4, time
+
+url = 'https://xkcd.com'  # Starting URL
+os.makedirs('xkcd', exist_ok=True)  # Store comics in ./xkcd
+num_downloads = 0
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1801" aria-label="315"></span>MAX_DOWNLOADS = 10
+while not url.endswith('#') and num_downloads &lt; MAX_DOWNLOADS:
+    # Download the page.
+<b class="calibre10">    print(f'Downloading page {url}...')</b>
+<b class="calibre10">    res = requests.get(url)</b>
+<b class="calibre10">    res.raise_for_status()</b>
+
+<b class="calibre10">  </b>  <b class="calibre10">soup = bs4.BeautifulSoup(res.text, 'html.parser')</b>
+
+    # TODO: Find the URL of the comic image.
+
+    # TODO: Download the image.
+
+    # TODO: Save the image to ./xkcd.
+
+    # TODO: Get the Prev button's url.
+
+print('Done.')
+</code></pre>
+<p class="tx">First, print <span class="thesansmonocd_w5regular_">url</span> so that the user knows which URL the program is about to download; then, use the <span class="thesansmonocd_w5regular_">requests</span> module’s <span class="thesansmonocd_w5regular_">requests.get()</span> function to download it. As always, you should immediately call the <span class="thesansmonocd_w5regular_">Response</span> object’s <span class="thesansmonocd_w5regular_">raise_for_status()</span> method to throw an exception and end the program if something went wrong with the download. Otherwise, create a <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object from the text of the downloaded page.</p>
+</section>
+<section type="division" aria-labelledby="sec30">
+<h4 class="h1" id="calibre_link-1802"><span id="calibre_link-347"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 3: Find and Download the Comic Image</span></h4>
+<p class="tni">To download the comic on each page, make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># downloadXkcdComics.py - Downloads XKCD comics
+
+import requests, os, bs4, time
+
+--<var class="calibre20">snip</var>--
+
+    # Find the URL of the comic image.
+<b class="calibre10">    comic_elem = soup.select('#comic img')</b>
+<b class="calibre10">    if comic_elem == []:</b>
+<b class="calibre10">        print('Could not find comic image.')</b>
+<b class="calibre10">    else:</b>
+<b class="calibre10">        comic_URL = 'https:' + comic_elem[0].get('src')</b>
+        # Download the image.
+<b class="calibre10">        print(f'Downloading image {comic_URL}...')</b>
+<b class="calibre10">        res = requests.get(comic_URL)</b>
+<b class="calibre10">        res.raise_for_status()</b>
+
+    # TODO: Save the image to ./xkcd.
+
+    # TODO: Get the Prev button's url.
+
+print('Done.')
+</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1803" aria-label="316"></span>Because you inspected the XKCD home page with your Developer Tools, you know that the <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element for the comic image is inside another element with the <span class="thesansmonocd_w5regular_">id</span> attribute set to <span class="thesansmonocd_w5regular_">comic</span>, so the selector <span class="thesansmonocd_w5regular_">'#comic img'</span> will get you the correct <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element from the <span class="thesansmonocd_w5regular_">BeautifulSoup</span> object.</p>
+<p class="tx">A few XKCD pages have special content that isn’t a simple image file. That’s fine; you’ll just skip those. If your selector doesn’t find any elements, <span class="thesansmonocd_w5regular_">soup.select('#comic img')</span> will return a <span class="thesansmonocd_w5regular_">ResultSet</span> object of a blank list. When that happens, the program can just print an error message and move on without downloading the image.</p>
+<p class="tx">Otherwise, the selector will return a list containing one <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element. You can get the <span class="thesansmonocd_w5regular_">src</span> attribute from this <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element and pass it to <span class="thesansmonocd_w5regular_">requests .get()</span> to download the comic’s image file.</p>
+</section>
+<section type="division" aria-labelledby="sec31">
+<h4 class="h1" id="calibre_link-1804"><span id="calibre_link-348"></span><span class="sans_futura_std_heavy_oblique_bi_">Step 4: Save the Image and Find the Previous Comic</span></h4>
+<p class="tni">At this point, the comic’s image file is stored in the <span class="thesansmonocd_w5regular_">res</span> variable. You need to write this image data to a file on the hard drive. Make your code look like the following:</p>
+<pre class="pre"><code class="calibre9"># downloadXkcdComics.py - Downloads XKCD comics
+
+import requests, os, bs4, time
+
+--<var class="calibre20">snip</var>--
+
+    # Save the image to ./xkcd.
+<b class="calibre10">        image_file = open(os.path.join('xkcd', os.path.basename(comic_URL)), 'wb')</b>
+<b class="calibre10">            for chunk in res.iter_content(100000):</b>
+<b class="calibre10">               image_file.write(chunk)</b>
+<b class="calibre10">            image_file.close()</b>
+
+    # Get the Prev button's URL.
+<b class="calibre10">      prev_link = soup.select('a[rel="prev"]')[0]</b>
+<b class="calibre10">      url = 'https://xkcd.com' + prev_link.get('href')</b>
+<b class="calibre10">      num_downloads += 1</b>
+<b class="calibre10">      time.sleep(1)  </b># Pause so we don't hammer the web server.
+
+print('Done.')
+</code></pre>
+<p class="tx">You’ll also need a filename for the local image file to pass to <span class="thesansmonocd_w5regular_">open()</span>. The <span class="thesansmonocd_w5regular_">comic_URL</span> will have a value like <span class="thesansmonocd_w5regular_">'https://imgs.xkcd.com/comics/heartbleed_explanation.png'</span>, which you might have noticed looks a lot like a filepath. In fact, you can call <span class="thesansmonocd_w5regular_">os.path.basename()</span> with <span class="thesansmonocd_w5regular_">comic_URL</span> to return just the last part of the URL, <span class="thesansmonocd_w5regular_">'heartbleed_explanation.png'</span>, and use this as the filename when saving the image to your hard drive. Join this name with the name of your <span class="thesansmonocd_w5regular_">xkcd</span> folder using <span class="thesansmonocd_w5regular_">os.path.join()</span> so that your program uses backslashes (<span class="thesansmonocd_w5regular_">\</span>) on Windows and forward slashes (<span class="thesansmonocd_w5regular_">/</span>) on macOS and Linux. Now that you finally have the filename, you can call <span class="thesansmonocd_w5regular_">open()</span> to open a new file in <span class="thesansmonocd_w5regular_">'wb'</span> mode.</p>
+<p class="tx">Remember from earlier in this chapter that, to save files you’ve downloaded using <span class="thesansmonocd_w5regular_">requests</span>, you need to loop over the return value of the <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1805" aria-label="317"></span><span class="thesansmonocd_w5regular_">iter_content()</span> method. The code in the <span class="thesansmonocd_w5regular_">for</span> loop writes chunks of the image data to the file. Then, the code closes the file, saving the image to your hard drive.</p>
+<p class="tx">Afterward, the selector <span class="thesansmonocd_w5regular_">'a[rel="prev"]'</span> identifies the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element with the <span class="thesansmonocd_w5regular_">rel</span> attribute set to <span class="thesansmonocd_w5regular_">prev</span>. You can use this <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element’s <span class="thesansmonocd_w5regular_">href</span> attribute to get the previous comic’s URL, which gets stored in <span class="thesansmonocd_w5regular_">url</span>.</p>
+<p class="tx">The last part of the loop’s code increments <span class="thesansmonocd_w5regular_">num_downloads</span> by <span class="thesansmonocd_w5regular_">1</span> so that it doesn’t download all of the comics by default. It also introduces a one-second pause with <span class="thesansmonocd_w5regular_">time.sleep(1)</span> to prevent the script from “hammering” the site (that is, impolitely downloading comics as fast as possible, which may cause performance issues for other website visitors). Then, the <span class="thesansmonocd_w5regular_">while</span> loop begins the entire download process again.</p>
+<p class="tx">The output of this program will look like this:</p>
+<pre class="pre"><code class="calibre9">Downloading page https://xkcd.com...
+Downloading image https://imgs.xkcd.com/comics/phone_alarm.png...
+Downloading page https://xkcd.com/1358/...
+Downloading image https://imgs.xkcd.com/comics/nro.png...
+Downloading page https://xkcd.com/1357/...
+Downloading image https://imgs.xkcd.com/comics/free_speech.png...
+Downloading page https://xkcd.com/1356/...
+Downloading image https://imgs.xkcd.com/comics/orbital_mechanics.png...
+Downloading page https://xkcd.com/1355/...
+Downloading image https://imgs.xkcd.com/comics/airplane_message.png...
+Downloading page https://xkcd.com/1354/...
+Downloading image https://imgs.xkcd.com/comics/heartbleed_explanation.png...
+--<var class="calibre20">snip</var>--
+</code></pre>
+<p class="tx">This project is a good example of a program that can automatically follow links to scrape large amounts of data from the web. You can learn about Beautiful Soup’s other features from its documentation at <i class="calibre5"><a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.crummy<wbr></wbr>.com<wbr></wbr>/software<wbr></wbr>/BeautifulSoup<wbr></wbr>/bs4<wbr></wbr>/doc<wbr></wbr>/</a></i>.</p>
+</section>
+<section type="division" aria-labelledby="sec32">
+<h4 class="h1"><span id="calibre_link-1806"></span><span id="calibre_link-349"></span><span class="sans_futura_std_heavy_oblique_bi_">Ideas for Similar Programs</span></h4>
+<p class="tni">Many web crawling programs involve downloading pages and following links. Similar programs could do the following:</p>
+<ul class="ul">
+<li class="bl">Back up an entire site by following all of its links.</li>
+<li class="bl">Copy all the messages on a web forum.</li>
+<li class="bl">Duplicate the catalog of items for sale on an online store.</li>
+</ul>
+<p class="tx">The <span class="thesansmonocd_w5regular_">requests</span> and <span class="thesansmonocd_w5regular_">bs4</span> modules are great as long as you can figure out the URL you need to pass to <span class="thesansmonocd_w5regular_">requests.get()</span>. However, this URL isn’t always so easy to find. Or perhaps the website you want your program to navigate requires you to log in first. Selenium will give your programs the power to perform such sophisticated tasks.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec33">
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-982" aria-label="318"></span>
+<h3 class="h" id="calibre_link-1807"><span id="calibre_link-350"></span><span class="sans_futura_std_bold_b_">Controlling the Browser with Selenium</span></h3>
+<p class="tni">Selenium lets Python directly control the browser by programmatically clicking links and filling in forms, just as a human user would. Using Selenium, you can interact with web pages in a much more advanced way than with <span class="thesansmonocd_w5regular_">requests</span> and Beautiful Soup; but because it launches a web browser, it’s a bit slower and hard to run in the background if, say, you just need to download some files from the web.</p>
+<p class="tx">Still, if you need to interact with a web page in a way that, for instance, depends on the JavaScript code that updates the page, you’ll need to use Selenium instead of <span class="thesansmonocd_w5regular_">requests</span>. That’s because major e-commerce websites such as Amazon almost certainly have software systems to recognize traffic that they suspect is a script harvesting their info or signing up for multiple free accounts. These sites may refuse to serve pages to you after a while, breaking any scripts you’ve made. Selenium is much more likely than <span class="thesansmonocd_w5regular_">requests</span> to function on these sites long term.</p>
+<p class="tx">A major “tell” to websites that you’re using a script is the <i class="calibre5">user-agent</i> string, which identifies the web browser and is included in all HTTP requests. For example, the user-agent string for the <span class="thesansmonocd_w5regular_">requests</span> module is something like <span class="thesansmonocd_w5regular_">'python-requests/</span><span class="sans_thesansmonocd_w5regular_italic_">X.XX.X</span><span class="thesansmonocd_w5regular_">'</span>. You can visit a site such as <i class="calibre5"><a href="https://www.whatsmyua.info" class="calibre1">https://<wbr></wbr>www<wbr></wbr>.whatsmyua<wbr></wbr>.info</a></i> to see your user-agent string. Using Selenium, you’re much more likely to pass for human, because not only is Selenium’s user agent the same as a regular browser (for instance, <span class="thesansmonocd_w5regular_">' Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0'</span>), but it has the same traffic patterns: a Selenium-controlled browser will download images, advertisements, cookies, and privacy-invading trackers just like a regular browser. However, websites can still find ways to detect Selenium, and major ticketing and e-commerce websites often block it to prevent the web scraping of their pages.</p>
+<section type="division" aria-labelledby="sec34">
+<h4 class="h1" id="calibre_link-1808"><span id="calibre_link-351"></span><span class="sans_futura_std_heavy_oblique_bi_">Starting a Selenium-Controlled Browser</span></h4>
+<p class="tni">The following examples will show you how to control Firefox’s web browser. If you don’t already have Firefox, you can download it for free from <i class="calibre5"><a href="https://getfirefox.com" class="calibre1">https://<wbr></wbr>getfirefox<wbr></wbr>.com</a></i>.</p>
+<p class="tx">Importing Selenium’s modules is slightly tricky. Instead of <span class="thesansmonocd_w5regular_">import selenium</span>, you must run <b class="calibre10">from selenium import webdriver</b>. (The exact reason why Selenium is set up this way is beyond the scope of this book.) After that, you can launch the Firefox browser with Selenium. Enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from selenium import webdriver</b>
+&gt;&gt;&gt; <b class="calibre10">browser = webdriver.Firefox()</b>
+&gt;&gt;&gt; <b class="calibre10">type(browser)</b>
+&lt;class 'selenium.webdriver.firefox.webdriver.WebDriver'&gt;
+&gt;&gt;&gt; <b class="calibre10">browser.get('https://inventwithpython.com')</b>
+</code></pre>
+<p class="tx">You’ll notice that when <span class="thesansmonocd_w5regular_">webdriver.Firefox()</span> is called, the Firefox web browser starts up. Calling <span class="thesansmonocd_w5regular_">type()</span> on the value <span class="thesansmonocd_w5regular_">webdriver.Firefox()</span> reveals it’s <span role="doc-pagebreak" type="pagebreak" id="calibre_link-946" aria-label="319"></span>of the <span class="thesansmonocd_w5regular_">WebDriver</span> data type. And calling <span class="thesansmonocd_w5regular_">browser.get('https://inventwithpython.com')</span> directs the browser to <i class="calibre5"><a href="https://inventwithpython.com" class="calibre1">https://<wbr></wbr>inventwithpython<wbr></wbr>.com</a></i>. Your browser should look something like Figure 13-6.</p>
+<figure class="img"><img class="img1" id="calibre_link-750" src="images/000016.jpg" alt="A screenshot of a web browser open to the web page at inventwithpython.com. Superimposed onto it is the Mu console." />
+<figcaption><p class="cap"><span class="sans_futura_std_book_oblique_i_">Figure 13-6: After we call</span> <span class="sans_thesansmonocd_w5regular_italic_">webdriver.Firefox</span><span class="sans_futura_std_book_oblique_i_">() and</span> <span class="sans_thesansmonocd_w5regular_italic_">get()</span> <span class="sans_futura_std_book_oblique_i_">in Mu, the Firefox browser appears.</span></p></figcaption>
+</figure>
+<p class="tx">If you encounter the error message “geckodriver executable needs to be in PATH,” you need to manually download the web driver for Firefox before you can use Selenium to control it. You can also control browsers other than Firefox if you install the web driver for them, and instead of manually downloading browser web drivers, you can use the webdriver-manager package from <i class="calibre5"><a href="https://pypi.org/project/webdriver-manager/" class="calibre1">https://<wbr></wbr>pypi<wbr></wbr>.org<wbr></wbr>/project<wbr></wbr>/webdriver<wbr></wbr>-manager<wbr></wbr>/</a></i>.</p>
+</section>
+<section type="division" aria-labelledby="sec35">
+<h4 class="h1" id="calibre_link-1809"><span id="calibre_link-352"></span><span class="sans_futura_std_heavy_oblique_bi_">Clicking Browser Buttons</span></h4>
+<p class="tni">Selenium can simulate clicks on various browser buttons through the following methods:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">browser.back() </span>Clicks the Back button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">browser.forward() </span>Clicks the Forward button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">browser.refresh() </span>Clicks the Refresh/Reload button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">browser.quit() </span>Clicks the Close Window button</p>
+</section>
+<section type="division" aria-labelledby="sec36">
+<h4 class="h1" id="calibre_link-1810"><span id="calibre_link-353"></span><span class="sans_futura_std_heavy_oblique_bi_">Finding Elements on the Page</span></h4>
+<p class="tni">A <span class="thesansmonocd_w5regular_">WebDriver</span> object has the <span class="thesansmonocd_w5regular_">find_element()</span> and <span class="thesansmonocd_w5regular_">find_elements()</span> methods for finding elements on a web page. The <span class="thesansmonocd_w5regular_">find_element()</span> method returns a single <span class="thesansmonocd_w5regular_">WebElement</span> object, representing the first element on the page that matches your query. The <span class="thesansmonocd_w5regular_">find_elements()</span> method returns a list of <span class="thesansmonocd_w5regular_">WebElement</span> objects for <i class="calibre5">every</i> matching element on the page.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-989" aria-label="320"></span>You can find elements through their class name, CSS selector, ID, or another means. First, run <span class="sans_thesansmonocd_w7bold_b_">from selenium.webdriver.common.by import By</span> to get the <span class="thesansmonocd_w5regular_">By</span> object. The <span class="thesansmonocd_w5regular_">By</span> object has several constants you can pass to the <span class="thesansmonocd_w5regular_">find_element()</span> and <span class="thesansmonocd_w5regular_">find_elements()</span> methods. Table 13-3 lists these constants.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-751"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-3:</span></span> <span class="sans_futura_std_book_">Selenium’s</span> <span class="thesansmonocd_w5regular_">By</span> <span class="sans_futura_std_book_">Constants for Finding Elements</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Constant name</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_thesansmonocd_w7bold_b_">WebElement object/list returned</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="thesansmonocd_w5regular_">By.CLASS_NAME</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">Elements that use the CSS class</span> <span class="sans_thesansmonocd_w5regular_italic_">name</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">By.CSS_SELECTOR</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Elements that match the CSS</span> <span class="sans_thesansmonocd_w5regular_italic_">selector</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">By.ID</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Elements with a matching</span> <span class="sans_thesansmonocd_w5regular_italic_">id</span> <span class="sans_futura_std_book_">attribute value</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">By.LINK_TEXT</span></p></td>
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">&lt;a&gt;</span> <span class="sans_futura_std_book_">elements that completely match the</span> <span class="sans_thesansmonocd_w5regular_italic_">text</span> <span class="sans_futura_std_book_">provided</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">By.PARTIAL_LINK_TEXT</span></p></td>
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">&lt;a&gt;</span> <span class="sans_futura_std_book_">elements that contain the</span> <span class="sans_thesansmonocd_w5regular_italic_">text</span> <span class="sans_futura_std_book_">provided</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">By.NAME</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Elements with a matching</span> <span class="sans_thesansmonocd_w5regular_italic_">name</span> <span class="sans_futura_std_book_">attribute value</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tbl"><p class="tch1"><span class="thesansmonocd_w5regular_">By.TAG_NAME</span></p></td>
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">Elements with a matching tag</span> <span class="sans_thesansmonocd_w5regular_italic_">name</span> <span class="sans_futura_std_book_">(case-insensitive; an</span> <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> <span class="sans_futura_std_book_">element is matched by</span> <span class="thesansmonocd_w5regular_">'a'</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">'A'</span><span class="sans_futura_std_book_">)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p class="tx">If no elements exist on the page that match what the method is looking for, Selenium raises a <span class="thesansmonocd_w5regular_">NoSuchElement</span> exception. If you do not want this exception to crash your program, add <span class="thesansmonocd_w5regular_">try</span> and <span class="thesansmonocd_w5regular_">except</span> statements to your code.</p>
+<p class="tx">Once you have the <span class="thesansmonocd_w5regular_">WebElement</span> object, you can learn more about it by reading the attributes or calling the methods in Table 13-4.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-752"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-4:</span></span> <span class="thesansmonocd_w5regular_">WebElement</span> <span class="sans_futura_std_book_">Attributes and Methods</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Attribute or method</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Description</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="thesansmonocd_w5regular_">tag_name</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">The tag name, such as</span> <span class="thesansmonocd_w5regular_">'a'</span> <span class="sans_futura_std_book_">for an</span> <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> <span class="sans_futura_std_book_">element.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">get_attribute(</span><span class="sans_thesansmonocd_w5regular_italic_">name</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The value for the element’s</span> <span class="thesansmonocd_w5regular_">name</span> <span class="sans_futura_std_book_">attribute, like</span> <span class="thesansmonocd_w5regular_">href</span> <span class="sans_futura_std_book_">in an</span> <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> <span class="sans_futura_std_book_">element.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">get_property(</span><span class="sans_thesansmonocd_w5regular_italic_">name</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The value for the element’s property, which does not appear in the HTML code. Some examples of HTML properties are</span> <span class="thesansmonocd_w5regular_">innerHTML</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">innerText</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">text</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The text within the element, such as</span> <span class="thesansmonocd_w5regular_">'hello'</span> <span class="sans_futura_std_book_">in the following:</span> <span class="thesansmonocd_w5regular_">&lt;span&gt;hello</span> <span class="thesansmonocd_w5regular_">&lt;/span&gt;</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">clear()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">For text field or text area elements, clears the text entered into it.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_displayed()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is visible; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_enabled()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">For input elements, returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is enabled; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_selected()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">For checkbox or radio button elements, returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is selected; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">location</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">A dictionary with keys</span> <span class="thesansmonocd_w5regular_">'x'</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">'y'</span> <span class="sans_futura_std_book_">for the position of the element in the page.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tbl"><p class="tch1"><span class="thesansmonocd_w5regular_">size</span></p></td>
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">A dictionary with keys</span> <span class="thesansmonocd_w5regular_">'width'</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">'height'</span> <span class="sans_futura_std_book_">for the size of the element in the page.</span></p></td>
+</tr>
+</tbody>
+</table>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1022" aria-label="321"></span>For example, open a new file editor tab and enter the following program:</p>
+<pre class="pre"><code class="calibre9">from selenium import webdriver
+from selenium.webdriver.common.by import By
+browser = webdriver.Firefox()
+browser.get('https://autbor.com/example3.html')
+elems = browser.find_elements(By.CSS_SELECTOR, 'p')
+print(elems[0].text)
+print(elems[0].get_property('innerHTML'))
+</code></pre>
+<p class="tx">Here, we open Firefox and direct it to a URL. On this page, we get a list of the <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> elements, look at the first one at index <span class="thesansmonocd_w5regular_">0</span>, and then get the string of the text inside that <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> element. Next, we get the string of its <span class="thesansmonocd_w5regular_">innerHTML</span> property. This program outputs the following:</p>
+<pre class="pre"><code class="calibre9">This &lt;p&gt; tag puts content into a single paragraph.
+This &lt;p&gt; tag puts &lt;b&gt;content&lt;/b&gt; into a &lt;i&gt;single&lt;/i&gt; paragraph.
+</code></pre>
+<p class="tx">The element’s <span class="thesansmonocd_w5regular_">text</span> attribute shows the text as we’d see it in the web browser: “This <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> tag puts content into a single paragraph.” We can also examine the element’s <span class="thesansmonocd_w5regular_">innerHTML</span> property by calling the <span class="thesansmonocd_w5regular_">get_property()</span> method, which is the HTML source code that includes tags and HTML entities. (The <span class="thesansmonocd_w5regular_">&lt;</span> and <span class="thesansmonocd_w5regular_">&gt;</span> are HTML escape characters that represent the less than [&lt;] and greater than [&gt;] characters.)</p>
+<p class="tx">Note that the <span class="thesansmonocd_w5regular_">text</span> attribute is just a shortcut for calling <span class="thesansmonocd_w5regular_">get_property('innerText')</span>. The names <i class="calibre5">innerHTML</i> and <i class="calibre5">innerText</i> are standard names of properties for HTML elements. In short, these element properties are accessed by JavaScript code and web drivers, while element attributes are part of the HTML source code, like the <span class="thesansmonocd_w5regular_">href</span> in <span class="thesansmonocd_w5regular_">&lt;a href="https://inventwithpython.com"&gt;</span>.</p>
+</section>
+<section type="division" aria-labelledby="sec37">
+<h4 class="h1" id="calibre_link-1811"><span id="calibre_link-354"></span><span class="sans_futura_std_heavy_oblique_bi_">Clicking Elements on the Page</span></h4>
+<p class="tni">The <span class="thesansmonocd_w5regular_">WebElement</span> objects returned from the <span class="thesansmonocd_w5regular_">find_element()</span> and <span class="thesansmonocd_w5regular_">find_elements()</span> methods have a <span class="thesansmonocd_w5regular_">click()</span> method that simulates a mouse click on that element. This method can be used to follow a link, make a selection on a radio button, click a Submit button, or trigger whatever else might happen when a mouse clicks the element. For example, enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from selenium import webdriver</b>
+&gt;&gt;&gt; <b class="calibre10">from selenium.webdriver.common.by import By</b>
+&gt;&gt;&gt; <b class="calibre10">browser = webdriver.Firefox()</b>
+&gt;&gt;&gt; <b class="calibre10">browser.get('https://autbor.com/example3.html')</b>
+&gt;&gt;&gt; <b class="calibre10">link_elem = browser.find_element(By.LINK_TEXT, 'This text is a link')</b>
+&gt;&gt;&gt; <b class="calibre10">type(link_elem)</b>
+&lt;class 'selenium.webdriver.remote.webelement.WebElement'&gt;
+&gt;&gt;&gt; <b class="calibre10">link_elem.click()  </b># Follows the "This text is a link" link
+</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-948" aria-label="322"></span>This code opens Firefox to <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i>, gets the <span class="thesansmonocd_w5regular_">WebElement</span> object for the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element with the text <i class="calibre5">This is a link</i>, and then simulates clicking that <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element as if you’d clicked the link yourself; the browser then follows that link.</p>
+</section>
+<section type="division" aria-labelledby="sec38">
+<h4 class="h1" id="calibre_link-1812"><span id="calibre_link-355"></span><span class="sans_futura_std_heavy_oblique_bi_">Filling Out and Submitting Forms</span></h4>
+<p class="tni">Sending keystrokes to text fields on a web page is a matter of finding the <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> or <span class="thesansmonocd_w5regular_">&lt;textarea&gt;</span> element for that text field and then calling the <span class="thesansmonocd_w5regular_">send_keys()</span> method. For example, enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from selenium import webdriver</b>
+&gt;&gt;&gt; <b class="calibre10">from selenium.webdriver.common.by import By</b>
+&gt;&gt;&gt; <b class="calibre10">browser = webdriver.Firefox()</b>
+&gt;&gt;&gt; <b class="calibre10">browser.get('https://autbor.com/example3.html')</b>
+&gt;&gt;&gt; <b class="calibre10">user_elem = browser.find_element(By.ID, 'login_user')</b>
+&gt;&gt;&gt; <b class="calibre10">user_elem.send_keys('</b><b class="calibre10"><var class="calibre20">your_real_username_here</var></b><b class="calibre10">')</b>
+&gt;&gt;&gt; <b class="calibre10">password_elem = browser.find_element(By.ID, 'login_pass')</b>
+&gt;&gt;&gt; <b class="calibre10">password_elem.send_keys('</b><b class="calibre10"><var class="calibre20">your_real_password_here</var></b><b class="calibre10">')</b>
+&gt;&gt;&gt; <b class="calibre10">password_elem.submit()</b>
+</code></pre>
+<p class="tx">As long as the login page hasn’t changed the <span class="thesansmonocd_w5regular_">id</span> of the username and password <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> elements, the previous code will fill in those text fields with the provided text. (You can always use the browser’s inspector to verify the <span class="thesansmonocd_w5regular_">id</span>.) Calling the <span class="thesansmonocd_w5regular_">submit()</span> method on any element will have the same result as clicking the Submit button for the form that element is in. (You could have just as easily called <span class="thesansmonocd_w5regular_">user_elem.submit()</span>, and the code would have done the same thing.)</p>
+<blockquote class="calibre17">
+<p class="note"><span class="sans_dogma_ot_bold_b_1">WARNING</span></p>
+</blockquote>
+<p class="note-txt"><i class="calibre5">Avoid putting your passwords in source code whenever possible. It’s easy to accidentally leak your passwords to others when they are left unencrypted on your hard drive.</i></p>
+</section>
+<section type="division" aria-labelledby="sec39">
+<h4 class="h1" id="calibre_link-1813"><span id="calibre_link-356"></span><span class="sans_futura_std_heavy_oblique_bi_">Sending Special Keys</span></h4>
+<p class="tni">Selenium has a module, <span class="thesansmonocd_w5regular_">selenium.webdriver.common.keys</span>, to represent keyboard keys, which it stores in attributes. Because the module has such a long name, it’s much easier to run <span class="thesansmonocd_w5regular_">from selenium.webdriver.common.keys import Keys</span> at the top of your program; if you do, you can simply write <span class="thesansmonocd_w5regular_">Keys</span> anywhere you’d normally have to write <span class="thesansmonocd_w5regular_">selenium.webdriver.common.keys</span>.</p>
+<p class="tx">You can pass <span class="thesansmonocd_w5regular_">send_keys()</span> any of the following constants:</p>
+<pre class="pre1"><code class="calibre9">Keys.ENTER  Keys.PAGE_UP       Keys.DOWN
+Keys.RETURN  Keys.ESCAPE        Keys.LEFT
+Keys.HOME    Keys.BACK_SPACE    Keys.RIGHT
+Keys.END     Keys.DELETE        Keys.TAB
+Keys.PAGE_DOWN   Keys.UP        Keys.F1 to Keys.F12
+</code></pre>
+<p class="tx">You can also pass the method a string, such as <span class="thesansmonocd_w5regular_">'hello'</span> or <span class="thesansmonocd_w5regular_">'?'</span>.</p>
+<p class="tx">For example, if the cursor isn’t currently in a text field, pressing the <small class="calibre4">HOME</small> and <small class="calibre4">END</small> keys will scroll the browser to the top and bottom of the <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1157" aria-label="323"></span>page, respectively. Enter the following into the interactive shell, and notice how the <span class="thesansmonocd_w5regular_">send_keys()</span> calls scroll the page:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from selenium import webdriver</b>
+&gt;&gt;&gt; <b class="calibre10">from selenium.webdriver.common.by import By</b>
+&gt;&gt;&gt; <b class="calibre10">from selenium.webdriver.common.keys import Keys</b>
+&gt;&gt;&gt; <b class="calibre10">browser = webdriver.Firefox()</b>
+&gt;&gt;&gt; <b class="calibre10">browser.get('https://nostarch.com')</b>
+&gt;&gt;&gt; <b class="calibre10">html_elem = browser.find_element(By.TAG_NAME, 'html')</b>
+&gt;&gt;&gt; <b class="calibre10">html_elem.send_keys(Keys.END)</b>  # Scrolls to bottom
+&gt;&gt;&gt; <b class="calibre10">html_elem.send_keys(Keys.HOME)</b>  # Scrolls to top
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">&lt;html</span>&gt; tag is the base tag in HTML files: the full content of the HTML file is enclosed within the <span class="thesansmonocd_w5regular_">&lt;html&gt;</span> and <span class="thesansmonocd_w5regular_">&lt;/html&gt;</span> tags. Calling <span class="thesansmonocd_w5regular_">browser.find_element(By.TAG_NAME, 'html')</span> is a good place to send keys to the general web page via the main <span class="thesansmonocd_w5regular_">&lt;html&gt;</span> tag. This would be useful if, for example, new content is loaded once you’ve scrolled to the bottom of the page.</p>
+<p class="tx">Selenium can do much more than the functions described here. It can modify your browser’s cookies, take screenshots of web pages, and run custom JavaScript. To learn more about these features, you can visit the Selenium documentation at <i class="calibre5"><a href="https://selenium-python.readthedocs.io" class="calibre1">https://<wbr></wbr>selenium<wbr></wbr>-python<wbr></wbr>.readthedocs<wbr></wbr>.io</a></i>. You can also find Python conference talks on Selenium by searching the website <i class="calibre5"><a href="https://pyvideo.org" class="calibre1">https://<wbr></wbr>pyvideo<wbr></wbr>.org</a></i>.</p>
+</section>
+</section>
+<section type="division" aria-labelledby="sec40">
+<h3 class="h" id="calibre_link-1814"><span id="calibre_link-357"></span><span class="sans_futura_std_bold_b_">Controlling the Browser with Playwright</span></h3>
+<p class="tni">Playwright is a browser-controlling library similar to Selenium, but it’s newer. While it might not currently have the wide audience that Selenium has, it does offer some features that merit learning. Chief among these new features is the ability to run in <i class="calibre5">headless mode</i>, meaning you can simulate a browser without actually having the browser window open on your screen. This makes it useful for running automated tests or web scraping jobs in the background. Playwright’s full documentation is at <i class="calibre5"><a href="https://playwright.dev/python/docs/intro" class="calibre1">https://<wbr></wbr>playwright<wbr></wbr>.dev<wbr></wbr>/python<wbr></wbr>/docs<wbr></wbr>/intro</a></i>.</p>
+<p class="tx">Also, installing web drivers for individual browsers is easier to do with Playwright compared to Selenium: just run <span class="sans_thesansmonocd_w7bold_b_">python -m playwright install</span> on Windows and <span class="sans_thesansmonocd_w7bold_b_">python3 &ndash;m playwright install</span> on macOS and Linux from a terminal window to install the web drivers for Firefox, Chrome, and Safari. Because Playwright is otherwise similar to Selenium, I won’t cover the general web scraping and CSS selector information in this section.</p>
+<section type="division" aria-labelledby="sec41">
+<h4 class="h1" id="calibre_link-1815"><span id="calibre_link-358"></span><span class="sans_futura_std_heavy_oblique_bi_">Starting a Playwright-Controlled Browser</span></h4>
+<p class="tni">Once Playwright is installed, you can test it with the following program:</p>
+<pre class="pre"><code class="calibre9">from playwright.sync_api import sync_playwright
+with sync_playwright() as playwright:
+    browser = playwright.firefox.launch()
+    page = browser.new_page()
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-985" aria-label="324"></span>    page.goto('https://autbor.com/example3.html')
+    print(page.title())
+    browser.close()
+</code></pre>
+<p class="tx">When run, this program pauses while it loads the Firefox browser and the <i class="calibre5"><a href="https://autbor.com/example3.html" class="calibre1">https://<wbr></wbr>autbor<wbr></wbr>.com<wbr></wbr>/example3<wbr></wbr>.html</a></i> website, and then prints its title, “Example Website.” You can also use <span class="thesansmonocd_w5regular_">playwright.chromium.launch()</span> or <span class="thesansmonocd_w5regular_">playwright.webkit.launch()</span> to use the Chrome and Safari browsers, respectively.</p>
+<p class="tx">Playwright automatically calls the <span class="thesansmonocd_w5regular_">start()</span> and <span class="thesansmonocd_w5regular_">stop()</span> methods when the execution enters and exits the <span class="thesansmonocd_w5regular_">with</span> statement’s block. Playwright has a synchronous mode, where its functions don’t return until the operation is complete. This way, you don’t accidentally tell the browser to find an element before the page has finished loading. Playwright’s asynchronous features are beyond the scope of this book.</p>
+<p class="tx">You may have noticed that no browser window appeared at all, because, by default, Playwright runs in headless mode. This, along with how Playwright puts its code inside a <span class="thesansmonocd_w5regular_">with</span> statement, can make debugging tricky. To run Playwright one step at a time, enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from playwright.sync_api import sync_playwright</b>
+&gt;&gt;&gt; <b class="calibre10">playwright = sync_playwright().start()</b>
+&gt;&gt;&gt; <b class="calibre10">browser = playwright.firefox.launch(headless=False, slow_mo=50)</b>
+&gt;&gt;&gt; <b class="calibre10">page = browser.new_page()</b>
+&gt;&gt;&gt; <b class="calibre10">page.goto('https://autbor.com/example3.html')</b>
+&lt;Response url='https://autbor.com/example3.html' request=&lt;Request
+ url='https://autbor.com/example3.html' method='GET'&gt;&gt;
+&gt;&gt;&gt; <b class="calibre10">browser.close()</b>
+&gt;&gt;&gt; <b class="calibre10">playwright.stop()</b>
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">headless=False</span> and <span class="thesansmonocd_w5regular_">slow_mo=50</span> keyword arguments to <span class="thesansmonocd_w5regular_">playwright.firefox.launch()</span> make the browser window appear on your screen and add a 50 ms delay to its operations so that it’s easier for you to see what is happening. You don’t have to worry about adding pauses to give web pages time to load: Playwright is much better than Selenium about not moving on to new operations before the previous one has finished.</p>
+<p class="tx">The <span class="thesansmonocd_w5regular_">Page</span> object returned by the <span class="thesansmonocd_w5regular_">new_page() Browser</span> method represents a new tab in a new browser window. You can have multiple browser windows open at the same time when using Playwright.</p>
+</section>
+<section type="division" aria-labelledby="sec42">
+<h4 class="h1"><span id="calibre_link-1816"></span><span id="calibre_link-359"></span><span class="sans_futura_std_heavy_oblique_bi_">Clicking Browser Buttons</span></h4>
+<p class="tni">Playwright can simulate clicking the browser buttons by calling the following <span class="thesansmonocd_w5regular_">Page</span> methods on the <span class="thesansmonocd_w5regular_">Page</span> object returned by <span class="thesansmonocd_w5regular_">browser.new_page()</span>:</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">page.go_back()</span> Clicks the Back button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">page.go_forward()</span> Clicks the Forward button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">page.reload()</span> Clicks the Refresh/Reload button</p>
+<p class="listplain"><span class="sans_thesansmonocd_w7bold_b_">page.close()</span> Clicks the Close Window button</p>
+</section>
+<section type="division" aria-labelledby="sec43">
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-880" aria-label="325"></span>
+<h4 class="h1"><span id="calibre_link-1817"></span><span id="calibre_link-360"></span><span class="sans_futura_std_heavy_oblique_bi_">Finding Elements on the Page</span></h4>
+<p class="tni">Playwright has <span class="thesansmonocd_w5regular_">Page</span> object methods colloquially called <i class="calibre5">locators</i> that return <span class="thesansmonocd_w5regular_">Locator</span> objects, which represent possible HTML elements on a web page. I say <i class="calibre5">possible</i> because, while Selenium immediately raises an error if it can’t find the element you ask for, Playwright understands that the page might dynamically create the element later. This is useful but has a slightly unfortunate side effect: if the element you specified doesn’t exist, Playwright pauses for 30 seconds while it waits for the element to appear.</p>
+<p class="tx">But this 30-second pause is tedious if you’ve simply made a typo. To immediately check whether an element exists and is visible on the page, call the <span class="thesansmonocd_w5regular_">is_visible()</span> method on the <span class="thesansmonocd_w5regular_">Locator</span> object returned by the locator. You can also call <span class="thesansmonocd_w5regular_">page.query_selector('</span><span class="sans_thesansmonocd_w5regular_italic_">selector</span><span class="thesansmonocd_w5regular_">')</span> where <span class="sans_thesansmonocd_w5regular_italic_">selector</span> is a string of the element’s CSS or XPath selector. The <span class="thesansmonocd_w5regular_">page.query_selector()</span> method immediately returns, and if it returns <span class="thesansmonocd_w5regular_">None</span>, the element doesn’t currently exist on the page. A <span class="thesansmonocd_w5regular_">Locator</span> object may match one or more HTML elements on the web page. Table 13-5 contains Playwright’s locators.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-753"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-5:</span></span> <span class="sans_futura_std_book_">Playwright’s Locators for Finding Elements</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Locator</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_thesansmonocd_w7bold_b_">Locator object returned</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="thesansmonocd_w5regular_">page.get_by_role(</span><span class="sans_thesansmonocd_w5regular_italic_">role</span><span class="thesansmonocd_w5regular_">,</span> <span class="sans_thesansmonocd_w5regular_italic_">name</span><span class="thesansmonocd_w5regular_">=</span><span class="sans_futura_std_book_oblique_i_">label</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">Elements by their role and optionally their</span> <span class="sans_thesansmonocd_w5regular_italic_">label</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">page.get_by_text(</span><span class="sans_thesansmonocd_w5regular_italic_">text</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Elements that contain</span> <span class="sans_thesansmonocd_w5regular_italic_">text</span> <span class="sans_futura_std_book_">as part of their inner text</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">page.get_by_label(</span><span class="sans_thesansmonocd_w5regular_italic_">label</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Elements with matching</span> <span class="sans_thesansmonocd_w5regular_italic_">&lt;label&gt;</span> <span class="sans_futura_std_book_">text as</span> <span class="sans_thesansmonocd_w5regular_italic_">label</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">page.get_by_placeholder(</span><span class="sans_thesansmonocd_w5regular_italic_">text</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">&lt;input&gt;</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">&lt;textarea&gt;</span> <span class="sans_futura_std_book_">elements with matching</span> <span class="thesansmonocd_w5regular_">placeholder</span> <span class="sans_futura_std_book_">attribute values as the</span> <span class="sans_thesansmonocd_w5regular_italic_">text</span> <span class="sans_futura_std_book_">provided</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">page.get_by_alt_text(</span><span class="sans_thesansmonocd_w5regular_italic_">text</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">&lt;img&gt;</span> <span class="sans_futura_std_book_">elements with matching</span> <span class="thesansmonocd_w5regular_">alt</span> <span class="sans_futura_std_book_">attribute values as the</span> <span class="sans_thesansmonocd_w5regular_italic_">text</span> <span class="sans_futura_std_book_">provided</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tbl"><p class="tch1"><span class="thesansmonocd_w5regular_">page.locator(</span><span class="sans_thesansmonocd_w5regular_italic_">selector</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">Elements with a matching CSS or XPath</span> <span class="sans_thesansmonocd_w5regular_italic_">selector</span></p></td>
+</tr>
+</tbody>
+</table>
+<p class="tx">The <span class="thesansmonocd_w5regular_">get_by_role()</span> method makes use of <i class="calibre5">Accessible Rich Internet Applications (ARIA)</i> roles, a set of standards that enable software to identify web page content to adapt it for users with vision or other disabilities. For example, the “heading” role applies to the <span class="thesansmonocd_w5regular_">&lt;h1&gt;</span> through <span class="thesansmonocd_w5regular_">&lt;h6&gt;</span> tags, with the text in between <span class="thesansmonocd_w5regular_">&lt;h1&gt;</span> and <span class="thesansmonocd_w5regular_">&lt;/h1&gt;</span> being the text you can identify with the <span class="thesansmonocd_w5regular_">get_by_role()</span> method’s <span class="thesansmonocd_w5regular_">name</span> keyword parameter. (There is much more to ARIA roles than this, but the topic is beyond the scope of this book.)</p>
+<p class="tx">You can use the text between the starting and ending tags to locate elements. Calling <span class="thesansmonocd_w5regular_">page.get_by_text('is a link')</span> would locate the <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> element in <span class="thesansmonocd_w5regular_">&lt;a href="https://inventwithpython.com”&gt;This text is a link&lt;/a&gt;</span>. A partial, case-insensitive text match is generally good enough to locate the element.</p>
+<p class="tx">The <span class="thesansmonocd_w5regular_">page.get_by_label()</span> method locates elements using the text between <span class="thesansmonocd_w5regular_">&lt;label&gt;</span> and <span class="thesansmonocd_w5regular_">&lt;/label&gt;</span> tags. For example, <span class="thesansmonocd_w5regular_">page.get_by_label('Agree')</span> would locate the <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> checkbox element in <span class="thesansmonocd_w5regular_">&lt;label&gt;Agree to disagree: &lt;input type="checkbox" /&gt;&lt;/label&gt;</span>.</p>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-897" aria-label="326"></span>The <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> and <span class="thesansmonocd_w5regular_">&lt;textarea&gt;</span> tags can have a <span class="thesansmonocd_w5regular_">placeholder</span> attribute to show placeholder text until the user enters real text. For example, <span class="thesansmonocd_w5regular_">page.get_by_placeholder('admin')</span> would locate the <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> element for <span class="thesansmonocd_w5regular_">&lt;input id="login_user" placeholder="admin" /&gt;</span>.</p>
+<p class="tx">Images on web pages can have alt text in their <span class="thesansmonocd_w5regular_">alt</span> attribute to describe the image contents to sight-impaired users. Some browsers show the alt text as a tool tip if you hover the mouse cursor over the image. The <span class="thesansmonocd_w5regular_">page.get_by_alt_text('Zophie')</span> call would return the <span class="thesansmonocd_w5regular_">&lt;img&gt;</span> element in <span class="thesansmonocd_w5regular_">&lt;img src="wow_such_zophie_thumb.webp" alt="Close-up of my cat Zophie." /&gt;</span>.</p>
+<p class="tx">If you just need to obtain a <span class="thesansmonocd_w5regular_">Locator</span> object via a CSS selector, call the <span class="thesansmonocd_w5regular_">locator()</span> locator and pass it the selector string. This is similar to Selenium’s <span class="thesansmonocd_w5regular_">find_elements()</span> method with the <span class="thesansmonocd_w5regular_">By.CSS_SELECTOR</span> constant.</p>
+<table class="basic-table">
+<caption class="calibre12"><p class="tt" id="calibre_link-754"><span class="sans_futura_std_bold_b_"><span class="sans_futura_std_bold_b_">Table 13-6:</span></span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">Methods</span></p></caption>
+
+<thead class="calibre13">
+<tr class="calibre14">
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Method</span></p></th>
+<th class="tch" scope="col"><p class="tch1"><span class="sans_futura_std_bold_b_">Description</span></p></th>
+</tr>
+</thead>
+<tbody class="calibre15">
+<tr class="calibre16">
+<td class="tbf"><p class="tch1"><span class="thesansmonocd_w5regular_">get_attribute(</span><span class="sans_thesansmonocd_w5regular_italic_">name</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tbf"><p class="tch1"><span class="sans_futura_std_book_">Returns the value for the element’s</span> <span class="sans_thesansmonocd_w5regular_italic_">name</span> <span class="sans_futura_std_book_">attribute, such as</span> <span class="thesansmonocd_w5regular_">'https://nostarch.com'</span> <span class="sans_futura_std_book_">for the</span> <span class="thesansmonocd_w5regular_">href</span> <span class="sans_futura_std_book_">attribute in an</span> <span class="thesansmonocd_w5regular_">&lt;a href="https://nostarch.com"&gt;</span> <span class="sans_futura_std_book_">element.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">count()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns an integer of the number of matching elements in this</span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">object.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">nth(</span><span class="sans_thesansmonocd_w5regular_italic_">index</span><span class="thesansmonocd_w5regular_">)</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns a</span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">object of the matching element given by the index. For example,</span> <span class="thesansmonocd_w5regular_">nth(3)</span> <span class="sans_futura_std_book_">returns the fourth matching element since index</span> <span class="thesansmonocd_w5regular_">0</span> <span class="sans_futura_std_book_">is the first matching element.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">first</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The</span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">object of the first matching element. This is the same as</span> <span class="thesansmonocd_w5regular_">nth(0)</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">last</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">The</span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">object of the last matching element. If there are, say, five match elements, this is the same as</span> <span class="thesansmonocd_w5regular_">nth(4)</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">all()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns a list of</span> <span class="thesansmonocd_w5regular_">Locator</span> <span class="sans_futura_std_book_">objects for each individual matching element.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">inner_text()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns the text within the element, such as</span> <span class="thesansmonocd_w5regular_">'hello'</span> <span class="sans_futura_std_book_">in</span> <span class="thesansmonocd_w5regular_">&lt;b&gt;hello&lt;/b&gt;</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">inner_html()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns the HTML source within the element, such as</span> <span class="thesansmonocd_w5regular_">'&lt;b&gt;hello&lt;/b&gt;'</span> <span class="sans_futura_std_book_">in</span> <span class="thesansmonocd_w5regular_">&lt;b&gt;hello&lt;/b&gt;</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">click()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Simulates a click on the element, which is useful for link, checkbox, and button elements.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_visible()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">Returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is visible; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_enabled()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">For input elements, returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is enabled; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre14">
+<td class="tb"><p class="tch1"><span class="thesansmonocd_w5regular_">is_checked()</span></p></td>
+<td class="tb"><p class="tch1"><span class="sans_futura_std_book_">For checkbox or radio button elements, returns</span> <span class="thesansmonocd_w5regular_">True</span> <span class="sans_futura_std_book_">if the element is selected; otherwise, returns</span> <span class="thesansmonocd_w5regular_">False</span><span class="sans_futura_std_book_">.</span></p></td>
+</tr>
+<tr class="calibre16">
+<td class="tbl"><p class="tch1"><span class="thesansmonocd_w5regular_">bounding_box()</span></p></td>
+<td class="tbl"><p class="tch1"><span class="sans_futura_std_book_">Returns a dictionary with keys</span> <span class="thesansmonocd_w5regular_">'x'</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">'y'</span> <span class="sans_futura_std_book_">for the position of the element’s top-left corner in the page, along with keys</span> <span class="thesansmonocd_w5regular_">'width'</span> <span class="sans_futura_std_book_">and</span> <span class="thesansmonocd_w5regular_">'height'</span> <span class="sans_futura_std_book_">for the element’s size.</span></p></td>
+</tr>
+</tbody>
+</table>
+<p class="tx">Since <span class="thesansmonocd_w5regular_">Locator</span> objects can represent multiple elements, you can obtain a <span class="thesansmonocd_w5regular_">Locator</span> object for an individual element with the <span class="thesansmonocd_w5regular_">nth()</span> method, passing the <span role="doc-pagebreak" type="pagebreak" id="calibre_link-1010" aria-label="327"></span>zero-based index. For example, open a new file editor tab and enter the following program:</p>
+<pre class="pre"><code class="calibre9">from playwright.sync_api import sync_playwright
+with sync_playwright() as playwright:
+    browser = playwright.firefox.launch(headless=False, slow_mo=50)
+    page = browser.new_page()
+    page.goto('https://autbor.com/example3.html')
+    elems = page.locator('p')
+    print(elems.nth(0).inner_text())
+    print(elems.nth(0).inner_html())
+</code></pre>
+<p class="tx">Like the Selenium example, this program outputs the following:</p>
+<pre class="pre"><code class="calibre9">This &lt;p&gt; tag puts content into a single paragraph.
+This &lt;p&gt; tag puts &lt;b&gt;content&lt;/b&gt; into a &lt;i&gt;single&lt;/i&gt; paragraph.
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">page.locator('p')</span> code returns a <span class="thesansmonocd_w5regular_">Locator</span> object that matches all <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> elements in the web page, and the <span class="thesansmonocd_w5regular_">nth(0)</span> method call returns a <span class="thesansmonocd_w5regular_">Locator</span> object for just the first <span class="thesansmonocd_w5regular_">&lt;p&gt;</span> element. The <span class="thesansmonocd_w5regular_">Locator</span> objects also have a <span class="thesansmonocd_w5regular_">count()</span> method for returning the number of matching elements in the locator (similar to the <span class="thesansmonocd_w5regular_">len()</span> function for Python lists). There are also <span class="thesansmonocd_w5regular_">first</span> and <span class="thesansmonocd_w5regular_">last</span> attributes that contain a locator that matches the first or last element. If you want a list of <span class="thesansmonocd_w5regular_">Locator</span> objects for each individual matching element, call the <span class="thesansmonocd_w5regular_">all()</span> method.</p>
+<p class="tx">Once you have <span class="thesansmonocd_w5regular_">Locator</span> objects for elements, you can perform mouse clicks and key presses on them, as described in the next few sections.</p>
+</section>
+<section type="division" aria-labelledby="sec44">
+<h4 class="h1"><span id="calibre_link-1818"></span><span id="calibre_link-361"></span><span class="sans_futura_std_heavy_oblique_bi_">Clicking Elements on the Page</span></h4>
+<p class="tni">The <span class="thesansmonocd_w5regular_">Page</span> object has <span class="thesansmonocd_w5regular_">click()</span>, <span class="thesansmonocd_w5regular_">check()</span>, <span class="thesansmonocd_w5regular_">uncheck()</span>, and <span class="thesansmonocd_w5regular_">set_checked()</span> methods for simulating clicks on link, button, and checkbox elements. You can call these methods and pass the string of a CSS or XPath selector of the element, or you can use Playwright’s <span class="thesansmonocd_w5regular_">Locator</span> functions in Table 13-6. Enter the following into the interactive shell:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from playwright.sync_api import sync_playwright</b>
+&gt;&gt;&gt; <b class="calibre10">playwright = sync_playwright().start()</b>
+&gt;&gt;&gt; <b class="calibre10">browser = playwright.firefox.launch(headless=False, slow_mo=50)</b>
+&gt;&gt;&gt; <b class="calibre10">page = browser.new_page()</b>
+&gt;&gt;&gt; <b class="calibre10">page.goto('https://autbor.com/example3.html')</b>
+&lt;Response url='https://autbor.com/example3.html' request=&lt;Request
+ url='https://autbor.com/example3.html' method='GET'&gt;&gt;
+&gt;&gt;&gt; <b class="calibre10">page.click('input[type=checkbox]')</b>  # Checks the checkbox
+&gt;&gt;&gt; <b class="calibre10">page.click('input[type=checkbox]')</b>  # Unchecks the checkbox
+&gt;&gt;&gt; <b class="calibre10">page.click('a')</b>  # Clicks the link
+&gt;&gt;&gt; <b class="calibre10">page.go_back()</b>
+&gt;&gt;&gt; <b class="calibre10">checkbox_elem = page.get_by_role('checkbox')</b>  # Calls a Locator method
+&gt;&gt;&gt; <b class="calibre10">checkbox_elem.check()</b>  # Checks the checkbox
+&gt;&gt;&gt; <b class="calibre10">checkbox_elem.uncheck()</b>  # Unchecks the checkbox
+&gt;&gt;&gt; <b class="calibre10">checkbox_elem.set_checked(True)</b>  # Checks the checkbox
+&gt;&gt;&gt; <b class="calibre10">checkbox_elem.set_checked(False)</b>  # Unchecks the checkbox
+&gt;&gt;&gt; <b class="calibre10">page.get_by_text('is a link').click()</b>  # Uses a Locator method
+<span role="doc-pagebreak" type="pagebreak" id="calibre_link-1161" aria-label="328"></span>&gt;&gt;&gt; <b class="calibre10">browser.close()</b>
+&gt;&gt;&gt; <b class="calibre10">playwright.stop()</b>
+</code></pre>
+<p class="tx">The <span class="thesansmonocd_w5regular_">check()</span> and <span class="thesansmonocd_w5regular_">uncheck()</span> methods are more reliable than <span class="thesansmonocd_w5regular_">click()</span> for checkboxes. The <span class="thesansmonocd_w5regular_">click()</span> method toggles the checkbox to the opposite state, while <span class="thesansmonocd_w5regular_">check()</span> and <span class="thesansmonocd_w5regular_">uncheck()</span> leave them checked or unchecked no matter what state they were in before. Similarly, the <span class="thesansmonocd_w5regular_">set_checked()</span> method allows you to pass <span class="thesansmonocd_w5regular_">True</span> to check the checkbox or <span class="thesansmonocd_w5regular_">False</span> to uncheck it.</p>
+</section>
+<section type="division" aria-labelledby="sec45">
+<h4 class="h1"><span id="calibre_link-1819"></span><span id="calibre_link-362"></span><span class="sans_futura_std_heavy_oblique_bi_">Filling Out and Submitting Forms</span></h4>
+<p class="tni"><span class="thesansmonocd_w5regular_">Locator</span> objects have a <span class="thesansmonocd_w5regular_">fill()</span> method that takes a string and fills in the <span class="thesansmonocd_w5regular_">&lt;input&gt;</span> or <span class="thesansmonocd_w5regular_">&lt;textarea&gt;</span> element with the text. This is useful for filling out online forms, such as the login form in our <i class="calibre5">example3.html</i> web page:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from playwright.sync_api import sync_playwright</b>
+&gt;&gt;&gt; <b class="calibre10">playwright = sync_playwright().start()</b>
+&gt;&gt;&gt; <b class="calibre10">browser = playwright.firefox.launch(headless=False, slow_mo=50)</b>
+&gt;&gt;&gt; <b class="calibre10">page = browser.new_page()</b>
+&gt;&gt;&gt; <b class="calibre10">page.goto('https://autbor.com/example3.html')</b>
+&lt;Response url='https://autbor.com/example3.html' request=&lt;Request
+url='https://autbor.com/example3.html' method='GET'&gt;&gt;
+&gt;&gt;&gt; <b class="calibre10">page.locator('#login_user').fill('</b><b class="calibre10"><var class="calibre20">your_real_username_here</var></b><b class="calibre10">')</b>
+&gt;&gt;&gt; <b class="calibre10">page.locator('#login_pass').fill('</b><b class="calibre10"><var class="calibre20">your_real_password_here</var></b><b class="calibre10">')</b>
+&gt;&gt;&gt; <b class="calibre10">page.locator('input[type=submit]').click()</b>
+&gt;&gt;&gt; <b class="calibre10">browser.close()</b>
+&gt;&gt;&gt; <b class="calibre10">playwright.stop()</b>
+</code></pre>
+<p class="tx">There’s also a <span class="thesansmonocd_w5regular_">clear()</span> method, which erases all of the text currently in the element. Unlike in Selenium, there’s no <span class="thesansmonocd_w5regular_">submit()</span> method in Playwright, and you’ll have to call <span class="thesansmonocd_w5regular_">click()</span> on its <span class="thesansmonocd_w5regular_">Locator</span> object matching the Submit button’s element.</p>
+</section>
+<section type="division" aria-labelledby="sec46">
+<h4 class="h1"><span id="calibre_link-1820"></span><span id="calibre_link-363"></span><span class="sans_futura_std_heavy_oblique_bi_">Sending Special Keys</span></h4>
+<p class="tni">You can also simulate keyboard key presses on elements in the web page with the <span class="thesansmonocd_w5regular_">press()</span> method for <span class="thesansmonocd_w5regular_">Locator</span> objects. For example, if the cursor isn’t currently in a text field, pressing the <small class="calibre4">HOME</small> and <small class="calibre4">END</small> keys will scroll the browser to the top and bottom of the page, respectively. Enter the following into the interactive shell, and notice how the <span class="thesansmonocd_w5regular_">press()</span> calls scroll the page:</p>
+<pre class="pre"><code class="calibre9">&gt;&gt;&gt; <b class="calibre10">from playwright.sync_api import sync_playwright</b>
+&gt;&gt;&gt; <b class="calibre10">playwright = sync_playwright().start()</b>
+&gt;&gt;&gt; <b class="calibre10">browser = playwright.firefox.launch(headless=False, slow_mo=50)</b>
+&gt;&gt;&gt; <b class="calibre10">page = browser.new_page()</b>
+&gt;&gt;&gt; <b class="calibre10">page.goto('https://autbor.com/example3.html')</b>
+&lt;Response url='https://autbor.com/example3.html' request=&lt;Request
+url='https://autbor.com/example3.html' method='GET'&gt;&gt;
+&gt;&gt;&gt; <b class="calibre10">page.locator('html').press('End')  </b># Scrolls to bottom
+&gt;&gt;&gt; <b class="calibre10">page.locator('html').press('Home')  </b># Scrolls to top
+&gt;&gt;&gt; <b class="calibre10">browser.close()</b>
+&gt;&gt;&gt; <b class="calibre10">playwright.stop()</b>
+</code></pre>
+<p class="tx"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1821" aria-label="329"></span>The strings you pass to <span class="thesansmonocd_w5regular_">press()</span> can include single character strings (such as <span class="thesansmonocd_w5regular_">'a'</span> or <span class="thesansmonocd_w5regular_">'?'</span>); the modification keys <span class="thesansmonocd_w5regular_">'Shift'</span>, <span class="thesansmonocd_w5regular_">'Control'</span>, <span class="thesansmonocd_w5regular_">'Alt'</span>, or <span class="thesansmonocd_w5regular_">'Meta'</span> (as in <span class="thesansmonocd_w5regular_">'Control+A'</span>, for <small class="calibre4">CTRL</small>-A); and any of the following:</p>
+<pre class="pre1"><code class="calibre9">'Backquote'    'Escape'    'ArrowDown'
+'Minus'     'End'       'ArrowRight'
+'Equal'     'Enter'     'ArrowUp'
+'Backslash' 'Home'      'F1' to 'F12'
+'Backspace' 'Insert'    'Digit0' to 'Digit9'
+'Tab'       'PageUp'    'KeyA' to 'KeyZ'
+'Delete'    'PageDown'  
+</code></pre>
+<p class="tx">Playwright can do much more beyond the functions described here. To learn more about these features, you can visit the Playwright documentation at <i class="calibre5"><a href="https://playwright.dev" class="calibre1">https://<wbr></wbr>playwright<wbr></wbr>.dev</a></i>. You can also find Python conference talks on Playwright by searching <i class="calibre5"><a href="https://pyvideo.org" class="calibre1">https://<wbr></wbr>pyvideo<wbr></wbr>.org</a></i>.</p>
+</section>
+</section>
+<section type="conclusion" role="doc-conclusion" aria-labelledby="sec47">
+<h3 class="h" id="calibre_link-1822"><span id="calibre_link-364"></span><span class="sans_futura_std_bold_b_">Summary</span></h3>
+<p class="tni">Most boring tasks aren’t limited to the files on your computer. Being able to programmatically download web pages will extend your programs to the internet. The <span class="thesansmonocd_w5regular_">requests</span> module makes downloading straightforward, and with some basic knowledge of HTML concepts and selectors, you can utilize the <span class="thesansmonocd_w5regular_">BeautifulSoup</span> module to parse the pages you download.</p>
+<p class="tx">But to fully automate any web-based task, you need direct control of your web browser through the Selenium and Playwright packages. These packages will allow you to log in to websites and fill out forms automatically. Because a web browser is the most common way to send and receive information over the internet, this is a great ability to have in your programmer toolkit.</p>
+</section>
+<section type="division" aria-labelledby="sec48">
+<h3 class="h" id="calibre_link-1823"><span id="calibre_link-365"></span><span class="sans_futura_std_bold_b_">Practice Questions</span></h3>
+<p class="listnumber">  1.  Briefly describe the differences between the <span class="thesansmonocd_w5regular_">webbrowser</span>, <span class="thesansmonocd_w5regular_">requests</span>, and <span class="thesansmonocd_w5regular_">bs4</span> modules.</p>
+<p class="listnumber">  2.  What type of object is returned by <span class="thesansmonocd_w5regular_">requests.get()</span>? How can you access the downloaded content as a string value?</p>
+<p class="listnumber">  3.  What <span class="thesansmonocd_w5regular_">requests</span> method checks that the download worked?</p>
+<p class="listnumber">  4.  How can you get the HTTP status code of a <span class="thesansmonocd_w5regular_">requests</span> response?</p>
+<p class="listnumber">  5.  How do you save a <span class="thesansmonocd_w5regular_">requests</span> response to a file?</p>
+<p class="listnumber">  6.  What two formats do most online APIs return their responses in?</p>
+<p class="listnumber">  7.  What is the keyboard shortcut for opening a browser’s Developer Tools?</p>
+<p class="listnumber">  8.  How can you view (in the Developer Tools) the HTML of a specific element on a web page?</p>
+<p class="listnumber">  9.  What CSS selector string would find the element with an <span class="thesansmonocd_w5regular_">id</span> attribute of <span class="thesansmonocd_w5regular_">main</span>?</p>
+<p class="listnumber"><span role="doc-pagebreak" type="pagebreak" id="calibre_link-1192" aria-label="330"></span>10.  What CSS selector string would find the elements with an <span class="thesansmonocd_w5regular_">id</span> attribute of <span class="thesansmonocd_w5regular_">highlight</span>?</p>
+<p class="listnumber">11.  Say you have a Beautiful Soup <span class="thesansmonocd_w5regular_">Tag</span> object stored in the variable <span class="thesansmonocd_w5regular_">spam</span> for the element <span class="thesansmonocd_w5regular_">&lt;div&gt;Hello, world!&lt;/div&gt;</span>. How could you get a string <span class="thesansmonocd_w5regular_">'Hello, world!'</span> from the <span class="thesansmonocd_w5regular_">Tag</span> object?</p>
+<p class="listnumber">12.  How would you store all the attributes of a Beautiful Soup <span class="thesansmonocd_w5regular_">Tag</span> object in a variable named <span class="thesansmonocd_w5regular_">link_elem</span>?</p>
+<p class="listnumber">13.  Running <span class="thesansmonocd_w5regular_">import selenium</span> doesn’t work. How do you properly import Selenium?</p>
+<p class="listnumber">14.  What’s the difference between the <span class="thesansmonocd_w5regular_">find_element()</span> and <span class="thesansmonocd_w5regular_">find_elements()</span> methods in Selenium?</p>
+<p class="listnumber">15.  What methods do Selenium’s <span class="thesansmonocd_w5regular_">WebElement</span> objects have for simulating mouse clicks and keyboard keys?</p>
+<p class="listnumber">16.  In Playwright, what locator method call simulates pressing <small class="calibre4">CTRL</small>-A to select all the text on the page?</p>
+<p class="listnumber">17.  How can you simulate clicking a browser’s Forward, Back, and Refresh buttons with Selenium?</p>
+<p class="listnumber">18.  How can you simulate clicking a browser’s Forward, Back, and Refresh buttons with Playwright?</p>
+</section>
+<section type="division" aria-labelledby="sec49">
+<h3 class="h" id="calibre_link-1824"><span id="calibre_link-366"></span><span class="sans_futura_std_bold_b_">Practice Programs</span></h3>
+<p class="tni">For practice, write programs to do the following tasks.</p>
+<section type="division" aria-labelledby="sec50">
+<h4 class="h1" id="calibre_link-1825"><span id="calibre_link-367"></span><span class="sans_futura_std_heavy_oblique_bi_">Image Site Downloader</span></h4>
+<p class="tni">Write a program that goes to a photo-sharing site like Flickr or Imgur, searches for a category of photo, and then downloads all the resulting images. You could write a program that works with any photo site that has a search feature.</p>
+</section>
+<section type="division" aria-labelledby="sec51">
+<h4 class="h1" id="calibre_link-1826"><span id="calibre_link-368"></span><span class="sans_futura_std_heavy_oblique_bi_">2048</span></h4>
+<p class="tni">The game 2048 is a simple game in which you combine tiles by sliding them up, down, left, or right with the arrow keys. You can actually get a fairly high score by sliding tiles in random directions. Write a program that will open the game at <i class="calibre5"><a href="https://play2048.co" class="calibre1">https://<wbr></wbr>play2048<wbr></wbr>.co</a></i> and keep sending up, right, down, and left keystrokes to automatically play the game.</p>
+</section>
+<section type="division" aria-labelledby="sec52">
+<h4 class="h1" id="calibre_link-1827"><span id="calibre_link-369"></span><span class="sans_futura_std_heavy_oblique_bi_">Link Verification</span></h4>
+<p class="tni">Write a program that, given the URL of a web page, will find every <span class="thesansmonocd_w5regular_">&lt;a&gt;</span> link on the page and test whether the linked URL results in a “404 Not Found” status code. The program should print out any broken links.</p>
+<ol class="footnotes">
+<li class="calibre22"><p class="fn"><span class="epub-sup"><a id="calibre_link-742" href="#calibre_link-755" class="calibre1">1</a></span> The answer is no.</p></li>
+</ol>
+</section>
+</section>
+</section>
+</div>
+
+
+
+</div>
+
+<div style="border: 1px solid black; padding: 5px;" id="closeable_ad_bar2">
+  <button onclick="document.getElementById('closeable_ad_bar2').outerHTML='';" style="vertical-align: top;">(close)</button><br>
+
+  Check out other books by Al Sweigart, <a href="https://inventwithpython.com">free online</a> or available for purchase:<br>
+
+<a target="_blank" href="https://nostarch.com/automate-boring-stuff-python-3rd-edition"><img src="/images/cover-automate3-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/big-book-small-python-projects"><img src="/images/cover-bigbookpython-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/inventwithpython"><img src="/images/cover-invent4th-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <a target="_blank" href="https://nostarch.com/crackingcodes"><img src="/images/cover-crackingcodes-thumb.webp" style="height: 200px; border: solid black 1px; display: inline;"></a>
+  <br>
+  <a href="https://inventwithpython.com/">...and other books as well!</a> Or register for the <a href="https://inventwithpython.com/automateudemy">online video course.</a> You can also <a href="https://inventwithpython.com/#donate">donate to support the author directly.</a>
+</div>
+</body></html>
