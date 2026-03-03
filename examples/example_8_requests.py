@@ -9,8 +9,8 @@ import requests
 URL = "https://automatetheboringstuff.com/3e/chapter13.html"
 
 # Dictionary of HTTP headers
-headers = {'User-Agent': f'your@email.com'}  # Metadata for request
-params = {'param1': 123, 'param2': 456}      # Adds ?param1=123&param2=456 to URL
+headers = {"User-Agent": f"your@email.com"}  # Metadata for request
+params = {"param1": 123, "param2": 456}      # Adds ?param1=123&param2=456 to URL
 
 response = requests.get(URL, params=params, headers=headers)
 
@@ -29,5 +29,5 @@ response.raise_for_status()
 # Get text contents
 print(response.text)
 
-with open('data/request.html', 'w', encoding="utf-8") as file:
+with open("data/request.html", "w", encoding="utf-8") as file:
     file.write(response.text)

@@ -11,10 +11,10 @@ import requests
 import sys
 
 BASE_URL = "https://api.github.com"  # The root of all of our api requests
-URL = BASE_URL + '/repos/ariannedee/python-beyond-basics'  # The specific data we want
+URL = BASE_URL + "/repos/ariannedee/python-beyond-basics"  # The specific data we want
 headers = {
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json',
+    "Accept": "application/vnd.github.v3+json",
+    "Content-Type": "application/json",
     # 'Authorization': 'token {Your token here}',  # See https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 }
 

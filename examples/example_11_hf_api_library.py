@@ -5,8 +5,7 @@ https://huggingface.co/docs/inference-providers/guides/first-api-call
 """
 from huggingface_hub import InferenceClient
 
-
-with open('secrets/hf.txt') as file:
+with open("secrets/hf.txt") as file:
     api_key = file.read().strip()
 
 

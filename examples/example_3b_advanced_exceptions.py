@@ -19,13 +19,13 @@ except Exception as e:
 
 
 try:
-    int('5')
+    int("5")
 except ValueError:
     print("Fail!")
 else:
-    print('Everything worked')  # Runs after try block finishes without errors
+    print("Everything worked")    # Runs after try block finishes without errors
 finally:
-    print('This always happens')  # Runs after everything, even if there was an error
+    print("This always happens")  # Runs after everything, even if there was an error
 
 
 class MyCustomError(Exception):

@@ -5,7 +5,7 @@ https://huggingface.co/docs/inference-providers/guides/first-api-call
 """
 import requests
 
-with open('secrets/hf.txt') as file:
+with open("secrets/hf.txt") as file:
     api_key = file.read().strip()
 
 
@@ -21,7 +21,7 @@ def query_huggingface_ai(message, model="meta-llama/Llama-3.2-3B-Instruct"):
                 "content": message,
             }
         ],
-        "model": model
+        "model": model,
     }
     response = requests.post(api_url, headers=headers, json=payload)
     response.raise_for_status()

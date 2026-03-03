@@ -9,8 +9,8 @@ import sys
 
 API_URL = "https://api.github.com/graphql"
 headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'token {Your token here}',  # See https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
+    "Content-Type": "application/json",
+    "Authorization": "token {Your token here}",  # See https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 }
 
 # Specify the data you want from the API, test at https://developer.github.com/v4/explorer
@@ -40,17 +40,17 @@ if response.status_code != 200:
 response = response.json()
 
 # Handle bad queries (e.g. improperly formatted query string)
-if 'errors' in response:
-    print(response['errors'])
+if "errors" in response:
+    print(response["errors"])
     sys.exit()
 
-data = response['data']
+data = response["data"]
 print(data)
 
 # Now do what you want with the data
-repos = data['viewer']['repositories']['nodes']
+repos = data["viewer"]["repositories"]["nodes"]
 if len(repos) > 0:
     # I want to list each repository name
     print("\nRepository names")
     for repo in repos:
-        print('  ' + repo['nameWithOwner'])
+        print("  " + repo["nameWithOwner"])
