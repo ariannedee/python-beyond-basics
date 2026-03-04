@@ -17,6 +17,7 @@ canadian_capitals = {
 
 canadian_capitals.keys()    # ['AB', 'BC', ...]
 canadian_capitals.values()  # ['Edmonton', 'Victoria', ...]
+canadian_capitals.items()   # [('AB', 'Edmonton'), ('BC', 'Victoria'), ...]
 
 print(canadian_capitals["ON"])   # Get an item
 del canadian_capitals["AB"]      # Delete an item
