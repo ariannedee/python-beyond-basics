@@ -1,8 +1,12 @@
 """
 Caesar cipher encoder
 """
+
+from pprint import pprint
+
+
 def build_cipher_map(shift: int) -> dict[str, str]:
-    """Create a dictionary, mapping each letter to 
+    """Create a dictionary, mapping each letter to
     the letter shifted by the given amount.
     e.g. shift=1: a->b, b->c, c->d, etc.
     e.g. shift=-1: a->z, b->a, c->b, etc.
@@ -23,5 +27,15 @@ def encrypt(message: str, shift: int) -> str:
         encrypted_message += encrypted_letter
     return encrypted_message
 
+def main():
+    while True:
+        try:
+            shift = int(input("Shift: "))
+            break
+        except ValueError:
+            print("  Invalid value")
+    message = input("Message: ")
+    print(encrypt(message, shift))
+
 if __name__ == "__main__":
-    print(encrypt("Hello World!", -3))
+    main()
