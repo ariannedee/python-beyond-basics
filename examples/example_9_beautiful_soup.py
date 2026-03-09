@@ -27,11 +27,11 @@ e = soup.find_all(string=re.compile(".*si.*"))     # Filter by content w/ reg ex
 
 # FINDING A SINGLE ELEMENT
 
-f = soup.a                                      # Get the first child element
-g = soup.find("a", attrs={"id": "link1"})       # Filter with attributes dict
-h = soup.find("a", id="link1")                  # Filter with keyword arguments
-i = soup.find("a", string="Elsie")              # Filter by content
-j = soup.find_all(string=re.compile(".*si.*"))  # Filter by content w/ reg ex
+f = soup.a                                  # Get the first child element
+g = soup.find("a", attrs={"id": "link1"})   # Filter with attributes dict
+h = soup.find("a", id="link1")              # Filter with keyword arguments
+i = soup.find("a", string="Elsie")          # Filter by content
+j = soup.find(string=re.compile(".*si.*"))  # Filter by content w/ reg ex
 
 
 # GETTING DATA FROM AN ELEMENT

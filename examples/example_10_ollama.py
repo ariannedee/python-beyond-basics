@@ -3,7 +3,7 @@ Documentation: https://github.com/ollama/ollama-python
 """
 import ollama
 
-prompt = "Hello"
+prompt = "Write a hello world script in python"
 
 response: ollama.ChatResponse = ollama.chat(
     model="llama3", messages=[{"role": "user", "content": prompt}]

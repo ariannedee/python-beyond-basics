@@ -18,6 +18,7 @@ with open("data/output.json") as file:
 
 with open("data/output.json", "w") as file:
     json_str = json.dumps(data)  # Convert data to str
+    print(json_str)
     file.write(json_str)         # Write str to file
 
 
