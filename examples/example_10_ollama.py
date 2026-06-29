@@ -12,7 +12,7 @@ prompt = "Write a hello world script in python"
 
 messages = [{"role": "user", "content": prompt}]
 response: ollama.ChatResponse = ollama.chat(
-    model="llama3", messages=messages
+    model="llama3.2", messages=messages
 )
 
 print(response["message"]["content"])  # Access via keys
